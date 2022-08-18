@@ -1,4 +1,4 @@
-![](https://github.com/senselogic/EUREKA/blob/master/eureka.png)
+![](https://github.com/senselogic/EUREKA/blob/master/LOGO/eureka.png)
 
 # Eureka
 

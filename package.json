@@ -1,11 +1,11 @@
 {
     "name": "eureka-orm",
     "description": "A lighweight ORM for CRUD queries on MySQL databases.",
-    "version": "0.1.0",
-    "main": "index.js",
+    "version": "0.1.1",
+    "main": "src/index.js",
     "repository": {
         "type": "git",
-        "url": "https://github.com/senselogic/EUREKA.git"
+        "url": "git+https://github.com/senselogic/EUREKA.git"
     },
     "keywords": [
         "mysql",
@@ -18,7 +18,8 @@
     ],
     "author": "Eric Pelzer <ecstatic.coder@gmail.com>",
     "files": [
-        "index.js"
+        "src/",
+        "README.md"
     ],
     "license": "LGPL-3.0-only",
     "dependencies": {
