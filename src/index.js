@@ -1,63 +1,7 @@
 // -- IMPORTS
 
-import mysql from 'mysql2/promise';
-
-// -- FUNCTIONS
-
-export function GetEncodedBase64(
-    text
-    )
-{
-    try
-    {
-        return btoa( text );
-    }
-    catch ( error )
-    {
-        return Buffer.from( text, "binary" ).toString( "base64" );
-    }
-}
-
-// ~~
-
-export function GetDecodedBase64(
-    text
-    )
-{
-    try
-    {
-        return atob( text );
-    }
-    catch ( error )
-    {
-        return Buffer.from( text , 'base64').toString( "binary" );
-    }
-}
-
-// ~~
-
-export function GetTuid(
-    uuid
-    )
-{
-    return GetEncodedBase64( uuid.replaceAll( "-", "" ) );
-}
-
-// ~~
-
-export function MakeTuid(
-    )
-{
-    return GetTuid( crypto.randomUUID() );
-}
-
-// ~~
-
-export function MakeUuid(
-    )
-{
-    return crypto.randomUUID();
-}
+import mysql from "mysql2/promise";
+import { NullTuid, NullUuid, GetEncodedDate, GetEncodedDateTime, GetQuotedValue } from "senselogic-gist";
 
 // -- TYPES
 
@@ -100,13 +44,16 @@ export class TYPE
         this.IsNatural = ( name === "UINT8" || name === "UINT16" || name === "UINT32" || name === "UINT64" );
         this.IsInteger = ( name === "INT8" || name === "INT16" || name === "INT32" || name === "INT64" );
         this.IsReal = ( name == "FLOAT32" || name == "FLOAT64" );
-        this.IsNumeric = ( this.IsBoolean || this.IsNatural || this.IsInteger || this.IsReal );
-        this.IsList = ( name === "LIST" );
-        this.IsMap = ( name === "MAP" );
-        this.IsStructured = ( this.IsList || this.IsMap );
+        this.IsNumeric = ( name === "NUMERIC" || this.IsBoolean || this.IsNatural || this.IsInteger || this.IsReal );
         this.IsTuid = ( name === "TUID" );
         this.IsUuid = ( name === "UUID" );
-        this.IsString = ( name === "STRING" );
+        this.IsDate = ( name === "DATE" );
+        this.IsDateTime = ( name === "DATETIME" );
+        this.IsString = ( name === "STRING" || this.IsTuid || this.Uuid || this.IsDate || this.IsDateTime );
+        this.IsList = ( name === "LIST" );
+        this.IsMap = ( name === "MAP" );
+        this.IsObject = ( name === "OBJECT" );
+        this.IsJson = ( name === "JSON" || name === this.IsList || this.IsMap || this.IsObject );
     }
 
     // -- INQUIRIES
@@ -122,11 +69,27 @@ export class TYPE
         {
             return 0;
         }
+        else if ( this.IsTuid )
+        {
+            return NullTuid;
+        }
+        else if ( this.IsUuid )
+        {
+            return NullUuid;
+        }
+        else if ( this.IsDate )
+        {
+            return GetEncodedDate( GetUniversalDate() );
+        }
+        else if ( this.IsDateTime )
+        {
+            return GetEncodedDateTime( GetUniversalDateTime() );
+        }
         else if ( this.IsList )
         {
             return [];
         }
-        else if ( this.IsMap )
+        else if ( this.IsJson )
         {
             return {};
         }
@@ -153,7 +116,7 @@ export class COLUMN
         this.Table = table;
         this.Name = name;
         this.Type = null;
-        this.DefaultValue = "";
+        this.DefaultValue = undefined;
         this.PropertyArray = [];
         this.PropertyByNameMap = new Map();
         this.IsKey = false;
@@ -161,11 +124,17 @@ export class COLUMN
 
     // -- INQUIRIES
 
-    GetQuotedValue(
-        value
+    GetDefaultValue(
         )
     {
-        return "\"" + value.toString().replaceAll( "\"", "\\\"" ) + "\"";
+        if ( this.DefaultValue !== undefined )
+        {
+            return this.DefaultValue;
+        }
+        else
+        {
+            return this.Type.GetDefaultValue();
+        }
     }
 
     // ~~
@@ -178,13 +147,13 @@ export class COLUMN
         {
             return value;
         }
-        else if ( this.Type.IsStructured )
+        else if ( this.Type.IsJson )
         {
-             return this.GetQuotedValue( JSON.stringify( value ) );
+             return GetQuotedValue( JSON.stringify( value ) );
         }
         else
         {
-            return this.GetQuotedValue( value );
+            return GetQuotedValue( value );
         }
     }
 
@@ -198,7 +167,7 @@ export class COLUMN
         {
             return Number( value );
         }
-        else if ( this.Type.IsStructured )
+        else if ( this.Type.IsJson )
         {
             return JSON.parse( value );
         }
@@ -215,7 +184,6 @@ export class COLUMN
         )
     {
         this.Type = type;
-        this.DefaultValue = type.GetDefaultValue();
     }
 
     // ~~
@@ -292,13 +260,14 @@ export class TABLE
 
         for ( let column of this.ColumnArray )
         {
-            if ( row.hasOwnProperty( column.Name ) )
+            if ( row.hasOwnProperty( column.Name )
+                 && row[ column.Name ] !== undefined )
             {
                 full_row[ column.Name ] = row[ column.Name ];
             }
             else
             {
-                full_row[ column.Name ] = column.DefaultValue;
+                full_row[ column.Name ] = column.GetDefaultValue();
             }
         }
 
@@ -381,6 +350,63 @@ export class TABLE
 
     // ~~
 
+    GetEncodedColumnNameArray(
+        column_name_array
+        )
+    {
+        let encoded_column_name_array = [];
+
+        for ( let column_name of column_name_array )
+        {
+            encoded_column_name_array.push( "`" + column_name + "`" );
+        }
+
+        return encoded_column_name_array;
+    }
+
+    // ~~
+
+    GetEncodedSortingColumnName(
+        sorting_column_name
+        )
+    {
+        switch ( sorting_column_name.substring( 0, 1 ) )
+        {
+            case "+" :
+            {
+                return "`" + sorting_column_name.substring( 1 ) + "` asc";
+            }
+
+            case "-" :
+            {
+                return "`" + sorting_column_name.substring( 1 ) + "` desc";
+            }
+
+            default :
+            {
+                return "`" + sorting_column_name + "` asc";
+            }
+        }
+    }
+
+    // ~~
+
+    GetEncodedSortingColumnNameArray(
+        sorting_column_name_array
+        )
+    {
+        let encoded_sorting_column_name_array = [];
+
+        for ( let dorting_column_name of sorting_column_name_array )
+        {
+            encoded_sorting_column_name_array.push( this.GetEncodedSortingColumnName( dorting_column_name ) );
+        }
+
+        return encoded_sorting_column_name_array;
+    }
+
+    // ~~
+
     GetEncodedRowColumnNameArray(
         encoded_row
         )
@@ -444,17 +470,68 @@ export class TABLE
 
     // ~~
 
-    async SelectRows(
-        statement = undefined,
+    async QueryRows(
+        statement,
         argument_array = undefined
         )
     {
-        if ( statement === undefined )
+        let row_array = await this.Database.Query( statement, argument_array );
+
+        return this.GetDecodedRowArray( row_array );
+    }
+
+    // ~~
+
+    async SelectRows(
+        column_name_array = undefined,
+        condition = undefined,
+        sorting_column_name_array = undefined,
+        maximum_row_count = undefined
+        )
+    {
+        let statement = "select ";
+
+        if ( column_name_array !== undefined )
         {
-            statement = "select * from " + this.GetEncodedName();
+            if ( Array.isArray( column_name_array ) )
+            {
+                statement += this.GetEncodedColumnNameArray( column_name_array ).join( ", " );
+            }
+            else
+            {
+                statement += column_name_array;
+            }
+        }
+        else
+        {
+            statement += "*";
         }
 
-        let row_array = await this.Database.Query( statement, argument_array );
+        statement += " from " + this.GetEncodedName();
+
+        if ( condition !== undefined )
+        {
+            statement += " where " + condition;
+        }
+
+        if ( sorting_column_name_array !== undefined )
+        {
+            if ( Array.isArray( sorting_column_name_array ) )
+            {
+                statement += " order by " + this.GetEncodedSortingColumnNameArray( sorting_column_name_array ).join( ", " );
+            }
+            else
+            {
+                statement += " order by " + this.GetEncodedSortingColumnName( sorting_column_name_array );
+            }
+        }
+
+        if ( maximum_row_count !== undefined )
+        {
+            statement += " limit " + maximum_row_count;
+        }
+
+        let row_array = await this.Database.Query( statement );
 
         return this.GetDecodedRowArray( row_array );
     }
