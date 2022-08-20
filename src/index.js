@@ -1,7 +1,7 @@
 // -- IMPORTS
 
 import mysql from "mysql2/promise";
-import { NullTuid, NullUuid, GetEncodedDate, GetEncodedDateTime, GetQuotedValue } from "senselogic-gist";
+import { NullTuid, NullUuid, GetEncodedDate, GetEncodedDateTime, GetEncodedText } from "senselogic-gist";
 
 // -- TYPES
 
@@ -41,15 +41,16 @@ export class TYPE
         this.Name = name;
         this.SubTypeArray = [];
         this.IsBoolean = ( name === "BOOL" );
-        this.IsNatural = ( name === "UINT8" || name === "UINT16" || name === "UINT32" || name === "UINT64" );
-        this.IsInteger = ( name === "INT8" || name === "INT16" || name === "INT32" || name === "INT64" );
-        this.IsReal = ( name == "FLOAT32" || name == "FLOAT64" );
+        this.IsNatural = name.startsWith( "UINT" );
+        this.IsInteger = name.startsWith( "INT" );;
+        this.IsReal = name.startsWith( "FLOAT" );;
         this.IsNumeric = ( name === "NUMERIC" || this.IsBoolean || this.IsNatural || this.IsInteger || this.IsReal );
         this.IsTuid = ( name === "TUID" );
         this.IsUuid = ( name === "UUID" );
         this.IsDate = ( name === "DATE" );
+        this.IsTime = ( name === "TIME" );
         this.IsDateTime = ( name === "DATETIME" );
-        this.IsString = ( name === "STRING" || this.IsTuid || this.Uuid || this.IsDate || this.IsDateTime );
+        this.IsString = ( name.startsWith( "STRING" ) || this.IsTuid || this.Uuid || this.IsDate || this.IsDateTime );
         this.IsList = ( name === "LIST" );
         this.IsMap = ( name === "MAP" );
         this.IsObject = ( name === "OBJECT" );
@@ -80,6 +81,10 @@ export class TYPE
         else if ( this.IsDate )
         {
             return GetEncodedDate( GetUniversalDate() );
+        }
+        else if ( this.IsTime )
+        {
+            return GetEncodedTime( GetUniversalTime() );
         }
         else if ( this.IsDateTime )
         {
@@ -139,6 +144,115 @@ export class COLUMN
 
     // ~~
 
+    HasProperty(
+        property_name
+        )
+    {
+        return this.PropertyByNameMap.has( property_name );
+    }
+
+    // ~~
+
+    GetPropertyValue(
+        property_name,
+        default_property_value
+        )
+    {
+        let property_value = this.PropertyByNameMap.get( property_name );
+
+        if ( property_value !== undefined )
+        {
+            return property_value;
+        }
+        else
+        {
+            return default_property_value;
+        }
+    }
+
+    // ~~
+
+    GetEncodedName(
+        )
+    {
+        return "`" + this.Name + "`";
+    }
+
+    // ~~
+
+    GetEncodedType(
+        )
+    {
+        switch ( this.Type.Name )
+        {
+            case "BOOL" : return "TINYINT UNSIGNED";
+            case "INT8" : return "TINYINT";
+            case "UINT8" : return "TINYINT UNSIGNED";
+            case "INT16" : return "SMALLINT";
+            case "UINT16" : return "SMALLINT UNSIGNED";
+            case "INT32" : return "INT";
+            case "UINT32" : return "INT UNSIGNED";
+            case "INT64" : return "BIGINT";
+            case "UINT64" : return "BIGINT UNSIGNED";
+            case "FLOAT32" : return "FLOAT";
+            case "FLOAT64" : return "DOUBLE";
+            case "STRING8" : return "TINYTEXT";
+            case "STRING16" : return "TEXT";
+            case "STRING24" : return "MEDIUMTEXT";
+            case "STRING32" : return "LONGTEXT";
+            case "STRING" :
+            {
+                if ( this.HasProperty( "capacity" ) )
+                {
+                    return "VARCHAR( " + this.GetPropertyValue( "capacity" ) + " )";
+                }
+                else
+                {
+                    return "TEXT";
+                }
+            }
+            case "DATE" : return "DATE";
+            case "TIME" : return "TIME";
+            case "DATETIME" : return "DATETIME";
+            case "TUID" : return "VARCHAR( 22 )";
+            case "UUID" : return "VARCHAR( 36 )";
+            case "BLOB" : return "BLOB";
+            default : return "TEXT";
+        }
+    }
+
+    // ~~
+
+    GetEncodedDeclaration(
+        )
+    {
+        let encoded_declaration
+            = this.GetEncodedName()
+              + " "
+              + this.GetEncodedType();
+
+        if ( this.HasProperty( "null" ) )
+        {
+            if ( this.GetPropertyValue( "null" ) )
+            {
+                encoded_declaration += " null"
+            }
+            else
+            {
+                encoded_declaration += " not null"
+            }
+        }
+
+        if ( this.GetPropertyValue( "incremented", false ) )
+        {
+            encoded_declaration += " auto_increment";
+        }
+
+        return encoded_declaration;
+    }
+
+    // ~~
+
     GetEncodedValue(
         value
         )
@@ -149,11 +263,11 @@ export class COLUMN
         }
         else if ( this.Type.IsJson )
         {
-             return GetQuotedValue( JSON.stringify( value ) );
+             return GetEncodedText( JSON.stringify( value ) );
         }
         else
         {
-            return GetQuotedValue( value );
+            return GetEncodedText( value );
         }
     }
 
@@ -350,6 +464,21 @@ export class TABLE
 
     // ~~
 
+    GetEncodedColumnDeclarationArray(
+        )
+    {
+        let encoded_column_declaration_array = [];
+
+        for ( let column of this.ColumnArray )
+        {
+            encoded_column_declaration_array.push( column.GetEncodedDeclaration() );
+        }
+
+        return encoded_column_declaration_array;
+    }
+
+    // ~~
+
     GetEncodedColumnNameArray(
         column_name_array
         )
@@ -470,6 +599,42 @@ export class TABLE
 
     // ~~
 
+    async Create(
+        )
+    {
+        let statement
+            = "create table if not exists "
+              + this.GetEncodedName()
+              + "( "
+              + this.GetEncodedColumnDeclarationArray().join( ", " );
+
+        for ( let column of this.ColumnArray )
+        {
+            if ( column.IsKey )
+            {
+                statement += ", primary key(`" + column.Name + "`)";
+            }
+        }
+
+        statement += " )";
+
+        await this.Database.Query( statement );
+    }
+
+    // ~~
+
+    async Drop(
+        )
+    {
+        let statement
+            = "drop table if exists "
+              + this.GetEncodedName();
+
+        await this.Database.Query( statement );
+    }
+
+    // ~~
+
     async QueryRows(
         statement,
         argument_array = undefined
@@ -546,11 +711,11 @@ export class TABLE
         let statement
             = "insert into "
               + this.GetEncodedName()
-              + "("
+              + "( "
               + this.GetEncodedRowColumnNameArray( encoded_row ).join( ", " )
-              + ") values ("
+              + " ) values ( "
               + this.GetEncodedRowColumnValueArray( encoded_row ).join( ", " )
-              + ")";
+              + " )";
 
         await this.Database.Query( statement );
     }
@@ -565,11 +730,11 @@ export class TABLE
         let statement
             = "replace into "
               + this.GetEncodedName()
-              + "("
+              + "( "
               + this.GetEncodedRowColumnNameArray( encoded_row ).join( ", " )
-              + ") values ("
+              + " ) values ( "
               + this.GetEncodedRowColumnValueArray( encoded_row ).join( ", " )
-              + ")";
+              + " )";
 
         await this.Database.Query( statement );
     }
@@ -685,7 +850,14 @@ export class DATABASE
         {
             if ( typeof property_data === "string" )
             {
-                property = new PROPERTY( this, property_data, true );
+                if ( property_data.startsWith( "!" ) )
+                {
+                    property = new PROPERTY( this, property_data.substring( 1 ), false );
+                }
+                else
+                {
+                    property = new PROPERTY( this, property_data, true );
+                }
             }
             else if ( Array.isArray( property_data )
                       && property_data.length === 2 )
