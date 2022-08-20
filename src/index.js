@@ -1,7 +1,17 @@
 // -- IMPORTS
 
 import mysql from "mysql2/promise";
-import { NullTuid, NullUuid, GetEncodedDate, GetEncodedDateTime, GetEncodedText } from "senselogic-gist";
+import {
+    NullTuid,
+    NullUuid,
+    GetEncodedDate,
+    GetEncodedDateTime,
+    GetEncodedText,
+    GetEncodedTime,
+    GetUniversalDate,
+    GetUniversalTime,
+    GetUniversalDateTime
+    } from "senselogic-gist";
 
 // -- TYPES
 
@@ -42,8 +52,8 @@ export class TYPE
         this.SubTypeArray = [];
         this.IsBoolean = ( name === "BOOL" );
         this.IsNatural = name.startsWith( "UINT" );
-        this.IsInteger = name.startsWith( "INT" );;
-        this.IsReal = name.startsWith( "FLOAT" );;
+        this.IsInteger = name.startsWith( "INT" );
+        this.IsReal = name.startsWith( "FLOAT" );
         this.IsNumeric = ( name === "NUMERIC" || this.IsBoolean || this.IsNatural || this.IsInteger || this.IsReal );
         this.IsTuid = ( name === "TUID" );
         this.IsUuid = ( name === "UUID" );
@@ -235,11 +245,11 @@ export class COLUMN
         {
             if ( this.GetPropertyValue( "null" ) )
             {
-                encoded_declaration += " null"
+                encoded_declaration += " null";
             }
             else
             {
-                encoded_declaration += " not null"
+                encoded_declaration += " not null";
             }
         }
 
@@ -366,26 +376,26 @@ export class TABLE
 
     // ~~
 
-    GetFullRow(
+    GetFilledRow(
         row
         )
     {
-        let full_row = {};
+        let filled_row = {};
 
         for ( let column of this.ColumnArray )
         {
             if ( row.hasOwnProperty( column.Name )
                  && row[ column.Name ] !== undefined )
             {
-                full_row[ column.Name ] = row[ column.Name ];
+                filled_row[ column.Name ] = row[ column.Name ];
             }
             else
             {
-                full_row[ column.Name ] = column.GetDefaultValue();
+                filled_row[ column.Name ] = column.GetDefaultValue();
             }
         }
 
-        return full_row;
+        return filled_row;
     }
 
     // ~~
@@ -599,6 +609,56 @@ export class TABLE
 
     // ~~
 
+    GetEncodedConditionValue(
+        condition_value
+        )
+    {
+        if ( typeof condition_value === "number" )
+        {
+            return condition_value;
+        }
+        else if ( typeof condition_value === "string" )
+        {
+            return GetEncodedText( condition_value );
+        }
+        else
+        {
+            throw Error( "Invalid condition value : " + condition_value );
+        }
+    }
+
+    // ~~
+
+    GetEncodedConditionExpression(
+        condition_expression
+        )
+    {
+        if ( typeof condition_expression === "string" )
+        {
+            return condition_expression;
+        }
+        else if ( Array.isArray( condition_expression ) )
+        {
+            if ( condition_expression.length === 3 )
+            {
+                if ( typeof condition_expression[ 0 ] === "string"
+                     && typeof condition_expression[ 1 ] === "string" )
+                {
+                    return (
+                        "`"
+                        + condition_expression[ 0 ]
+                        + "` "
+                        + condition_expression[ 1 ]
+                        + " "
+                        + this.GetEncodedConditionValue( condition_expression[ 2 ] )
+                        );
+                }
+            }
+        }
+    }
+
+    // ~~
+
     async Create(
         )
     {
@@ -649,7 +709,8 @@ export class TABLE
 
     async SelectRows(
         column_name_array = undefined,
-        condition = undefined,
+        condition_expression = undefined,
+        argument_array = undefined,
         sorting_column_name_array = undefined,
         maximum_row_count = undefined
         )
@@ -674,9 +735,9 @@ export class TABLE
 
         statement += " from " + this.GetEncodedName();
 
-        if ( condition !== undefined )
+        if ( condition_expression !== undefined )
         {
-            statement += " where " + condition;
+            statement += " where " + this.GetEncodedConditionExpression( condition_expression );
         }
 
         if ( sorting_column_name_array !== undefined )
@@ -696,9 +757,35 @@ export class TABLE
             statement += " limit " + maximum_row_count;
         }
 
-        let row_array = await this.Database.Query( statement );
+        let row_array = await this.Database.Query( statement, argument_array );
 
         return this.GetDecodedRowArray( row_array );
+    }
+
+    // ~~
+
+    async SelectRow(
+        column_name_array = undefined,
+        condition_expression = undefined,
+        argument_array = undefined
+        )
+    {
+        let row_array = await this.SelectRows( column_name_array, condition_expression, argument_array, undefined, 1 );
+
+        return row_array[ 0 ];
+    }
+
+    // ~~
+
+    async HasRow(
+        column_name_array = undefined,
+        condition_expression = undefined,
+        argument_array = undefined
+        )
+    {
+        let row_array = await this.SelectRows( column_name_array, condition_expression, argument_array, undefined, 1 );
+
+        return row_array.length > 0;
     }
 
     // ~~
@@ -707,7 +794,8 @@ export class TABLE
         row
         )
     {
-        let encoded_row = this.GetEncodedRow( this.GetFullRow( row ) );
+        let filled_row = this.GetFilledRow( row );
+        let encoded_row = this.GetEncodedRow( filled_row );
         let statement
             = "insert into "
               + this.GetEncodedName()
@@ -718,6 +806,8 @@ export class TABLE
               + " )";
 
         await this.Database.Query( statement );
+
+        return filled_row;
     }
 
     // ~~
@@ -726,7 +816,8 @@ export class TABLE
         row
         )
     {
-        let encoded_row = this.GetEncodedRow( this.GetFullRow( row ) );
+        let filled_row = this.GetFilledRow( row );
+        let encoded_row = this.GetEncodedRow( filled_row );
         let statement
             = "replace into "
               + this.GetEncodedName()
@@ -737,6 +828,8 @@ export class TABLE
               + " )";
 
         await this.Database.Query( statement );
+
+        return filled_row;
     }
 
     // ~~
