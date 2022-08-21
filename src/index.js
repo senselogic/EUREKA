@@ -2,15 +2,18 @@
 
 import mysql from "mysql2/promise";
 import {
-    NullTuid,
-    NullUuid,
     GetEncodedDate,
     GetEncodedDateTime,
     GetEncodedText,
     GetEncodedTime,
+    GetEncodedUniversalDate,
+    GetEncodedUniversalDateTime,
+    GetEncodedUniversalTime,
     GetUniversalDate,
+    GetUniversalDateTime,
     GetUniversalTime,
-    GetUniversalDateTime
+    NullUuid,
+    NullTuid
     } from "senselogic-gist";
 
 // -- TYPES
@@ -290,6 +293,18 @@ export class COLUMN
         if ( this.Type.IsNumeric )
         {
             return Number( value );
+        }
+        else if ( this.Type.IsDate )
+        {
+            return GetEncodedDate( GetUniversalDate( value ) );
+        }
+        else if ( this.Type.IsTime )
+        {
+            return GetEncodedTime( GetUniversalTime( value ) );
+        }
+        else if ( this.Type.IsDateTime )
+        {
+            return GetEncodedDateTime( GetUniversalDateTime( value ) );
         }
         else if ( this.Type.IsJson )
         {
