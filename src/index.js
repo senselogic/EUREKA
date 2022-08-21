@@ -49,7 +49,7 @@ export class TYPE
         this.Table = table;
         this.Column = column;
         this.Name = name;
-        this.SubTypeArray = [];
+        this.SubTypeArray = sub_type_array;
         this.IsBoolean = ( name === "BOOL" );
         this.IsNatural = name.startsWith( "UINT" );
         this.IsInteger = name.startsWith( "INT" );
