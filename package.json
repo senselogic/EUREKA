@@ -1,7 +1,7 @@
 {
     "name": "senselogic-eureka",
     "description": "Lightweight ORM for CRUD queries on MySQL databases.",
-    "version": "0.1.5",
+    "version": "0.1.6",
     "author": "Eric Pelzer <ecstatic.coder@gmail.com>",
     "license": "LGPL-3.0-only",
     "keywords": [

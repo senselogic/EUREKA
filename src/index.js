@@ -624,52 +624,82 @@ export class TABLE
 
     // ~~
 
-    GetEncodedConditionValue(
-        condition_value
+    GetEncodedValue(
+        value
         )
     {
-        if ( typeof condition_value === "number" )
+        if ( typeof value === "number" )
         {
-            return condition_value;
+            return value;
         }
-        else if ( typeof condition_value === "string" )
+        else if ( typeof value === "string" )
         {
-            return GetEncodedText( condition_value );
+            return GetEncodedText( value );
+        }
+        else if ( Array.isArray( value ) )
+        {
+            return this.GetEncodedExpression( value );
         }
         else
         {
-            throw Error( "Invalid condition value : " + condition_value );
+            throw Error( "Invalid condition value : " + value );
         }
     }
 
     // ~~
 
-    GetEncodedConditionExpression(
-        condition_expression
+    GetEncodedExpression(
+        expression
         )
     {
-        if ( typeof condition_expression === "string" )
+        if ( typeof expression === "string" )
         {
-            return condition_expression;
+            return expression;
         }
-        else if ( Array.isArray( condition_expression ) )
+        else if ( Array.isArray( expression ) )
         {
-            if ( condition_expression.length === 3 )
+            if ( expression.length === 1
+                 && typeof expression[ 0 ] === "string" )
             {
-                if ( typeof condition_expression[ 0 ] === "string"
-                     && typeof condition_expression[ 1 ] === "string" )
+                return "`" + expression[ 0 ] + "`";
+            }
+            else if ( expression.length === 2 )
+            {
+                if ( expression[ 0 ] === "not" )
                 {
                     return (
-                        "`"
-                        + condition_expression[ 0 ]
-                        + "` "
-                        + condition_expression[ 1 ]
-                        + " "
-                        + this.GetEncodedConditionValue( condition_expression[ 2 ] )
+                        "( not "
+                        + this.GetEncodedValue( expression[ 2 ] )
+                        + " )"
                         );
                 }
             }
+            else if ( expression.length >= 3
+                      && ( expression.length & 1 ) === 1 )
+            {
+                let encoded_expression
+                    = "( " + this.GetEncodedValue( expression[ 0 ] );
+
+                for ( let expression_token_index = 1;
+                      expression_token_index + 1 < expression.length;
+                      expression_token_index += 2 )
+                {
+                    encoded_expression
+                        += " "
+                           + expression[ expression_token_index ]
+                           + " "
+                           + this.GetEncodedValue( expression[ expression_token_index + 1 ] )
+                }
+
+                encoded_expression += " )";
+
+                return encoded_expression;
+            }
         }
+
+        throw new Error( "Invalid condition expression : " + JSON.stringify( expression ) );
+
+        return null;
     }
 
     // ~~
@@ -723,24 +753,26 @@ export class TABLE
     // ~~
 
     async SelectRows(
-        column_name_array = undefined,
-        condition_expression = undefined,
-        argument_array = undefined,
-        sorting_column_name_array = undefined,
-        maximum_row_count = undefined
+        {
+            Columns,
+            Where,
+            Order,
+            Limit,
+            ArgumentArray
+        } = {}
         )
     {
         let statement = "select ";
 
-        if ( column_name_array !== undefined )
+        if ( Columns !== undefined )
         {
-            if ( Array.isArray( column_name_array ) )
+            if ( Array.isArray( Columns ) )
             {
-                statement += this.GetEncodedColumnNameArray( column_name_array ).join( ", " );
+                statement += this.GetEncodedColumnNameArray( Columns ).join( ", " );
             }
             else
             {
-                statement += column_name_array;
+                statement += Columns;
             }
         }
         else
@@ -750,29 +782,29 @@ export class TABLE
 
         statement += " from " + this.GetEncodedName();
 
-        if ( condition_expression !== undefined )
+        if ( Where !== undefined )
         {
-            statement += " where " + this.GetEncodedConditionExpression( condition_expression );
+            statement += " where " + this.GetEncodedExpression( Where );
         }
 
-        if ( sorting_column_name_array !== undefined )
+        if ( Order !== undefined )
         {
-            if ( Array.isArray( sorting_column_name_array ) )
+            if ( Array.isArray( Order ) )
             {
-                statement += " order by " + this.GetEncodedSortingColumnNameArray( sorting_column_name_array ).join( ", " );
+                statement += " order by " + this.GetEncodedOrder( Order ).join( ", " );
             }
             else
             {
-                statement += " order by " + this.GetEncodedSortingColumnName( sorting_column_name_array );
+                statement += " order by " + this.GetEncodedSortingColumnName( Order );
             }
         }
 
-        if ( maximum_row_count !== undefined )
+        if ( Limit !== undefined )
         {
-            statement += " limit " + maximum_row_count;
+            statement += " limit " + Limit;
         }
 
-        let row_array = await this.Database.Query( statement, argument_array );
+        let row_array = await this.Database.Query( statement, ArgumentArray );
 
         return this.GetDecodedRowArray( row_array );
     }
@@ -780,25 +812,36 @@ export class TABLE
     // ~~
 
     async SelectRow(
-        column_name_array = undefined,
-        condition_expression = undefined,
-        argument_array = undefined
+        {
+            Columns,
+            Where,
+            ArgumentArray
+        } = {}
         )
     {
-        let row_array = await this.SelectRows( column_name_array, condition_expression, argument_array, undefined, 1 );
+        let row_array = await this.SelectRows(  { Columns, Where, Limit : 1, ArgumentArray } );
 
-        return row_array[ 0 ];
+        if ( row_array.length > 0 )
+        {
+            return row_array[ 0 ];
+        }
+        else
+        {
+            return null;
+        }
     }
 
     // ~~
 
     async HasRow(
-        column_name_array = undefined,
-        condition_expression = undefined,
-        argument_array = undefined
+        {
+            Columns,
+            Where,
+            ArgumentArray
+        } = {}
         )
     {
-        let row_array = await this.SelectRows( column_name_array, condition_expression, argument_array, undefined, 1 );
+        let row_array = await this.SelectRows( { Columns, Where, Limit : 1, ArgumentArray } );
 
         return row_array.length > 0;
     }
