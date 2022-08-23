@@ -2,13 +2,10 @@
 
 import mysql from "mysql2/promise";
 import {
-    GetEncodedDate,
-    GetEncodedDateTime,
-    GetEncodedText,
-    GetEncodedTime,
-    GetEncodedUniversalDate,
-    GetEncodedUniversalDateTime,
-    GetEncodedUniversalTime,
+    GetDateText,
+    GetDateTimeText,
+    GetQuotedText,
+    GetTimeText,
     GetUniversalDate,
     GetUniversalDateTime,
     GetUniversalTime,
@@ -93,15 +90,15 @@ export class TYPE
         }
         else if ( this.IsDate )
         {
-            return GetEncodedDate( GetUniversalDate() );
+            return GetDateText( GetUniversalDate() );
         }
         else if ( this.IsTime )
         {
-            return GetEncodedTime( GetUniversalTime() );
+            return GetTimeText( GetUniversalTime() );
         }
         else if ( this.IsDateTime )
         {
-            return GetEncodedDateTime( GetUniversalDateTime() );
+            return GetDateTimeText( GetUniversalDateTime() );
         }
         else if ( this.IsList )
         {
@@ -276,11 +273,11 @@ export class COLUMN
         }
         else if ( this.Type.IsJson )
         {
-             return GetEncodedText( JSON.stringify( value ) );
+             return GetQuotedText( JSON.stringify( value ) );
         }
         else
         {
-            return GetEncodedText( value );
+            return GetQuotedText( value );
         }
     }
 
@@ -296,15 +293,15 @@ export class COLUMN
         }
         else if ( this.Type.IsDate )
         {
-            return GetEncodedDate( GetUniversalDate( value ) );
+            return GetDateText( GetUniversalDate( value ) );
         }
         else if ( this.Type.IsTime )
         {
-            return GetEncodedTime( GetUniversalTime( value ) );
+            return GetTimeText( GetUniversalTime( value ) );
         }
         else if ( this.Type.IsDateTime )
         {
-            return GetEncodedDateTime( GetUniversalDateTime( value ) );
+            return GetDateTimeText( GetUniversalDateTime( value ) );
         }
         else if ( this.Type.IsJson )
         {
@@ -634,7 +631,7 @@ export class TABLE
         }
         else if ( typeof value === "string" )
         {
-            return GetEncodedText( value );
+            return GetQuotedText( value );
         }
         else if ( Array.isArray( value ) )
         {
@@ -661,7 +658,14 @@ export class TABLE
             if ( expression.length === 1
                  && typeof expression[ 0 ] === "string" )
             {
-                return "`" + expression[ 0 ] + "`";
+                if ( expression[ 0 ] === "?" )
+                {
+                    return "?";
+                }
+                else
+                {
+                    return "`" + expression[ 0 ] + "`";
+                }
             }
             else if ( expression.length === 2 )
             {
@@ -698,8 +702,6 @@ export class TABLE
         }
 
         throw new Error( "Invalid condition expression : " + JSON.stringify( expression ) );
-
-        return null;
     }
 
     // ~~
@@ -758,7 +760,7 @@ export class TABLE
             Where,
             Order,
             Limit,
-            ArgumentArray
+            Arguments
         } = {}
         )
     {
@@ -804,7 +806,7 @@ export class TABLE
             statement += " limit " + Limit;
         }
 
-        let row_array = await this.Database.Query( statement, ArgumentArray );
+        let row_array = await this.Database.Query( statement, Arguments );
 
         return this.GetDecodedRowArray( row_array );
     }
@@ -815,11 +817,11 @@ export class TABLE
         {
             Columns,
             Where,
-            ArgumentArray
+            Arguments
         } = {}
         )
     {
-        let row_array = await this.SelectRows(  { Columns, Where, Limit : 1, ArgumentArray } );
+        let row_array = await this.SelectRows(  { Columns, Where, Limit : 1, Arguments } );
 
         if ( row_array.length > 0 )
         {
@@ -837,11 +839,11 @@ export class TABLE
         {
             Columns,
             Where,
-            ArgumentArray
+            Arguments
         } = {}
         )
     {
-        let row_array = await this.SelectRows( { Columns, Where, Limit : 1, ArgumentArray } );
+        let row_array = await this.SelectRows( { Columns, Where, Limit : 1, Arguments } );
 
         return row_array.length > 0;
     }
