@@ -1,9 +1,23 @@
 {
     "name": "senselogic-eureka",
+    "version": "0.1.8",
     "description": "Lightweight ORM for CRUD queries on MySQL databases.",
-    "version": "0.1.7",
-    "author": "Eric Pelzer <ecstatic.coder@gmail.com>",
     "license": "LGPL-3.0-only",
+    "author": "Eric Pelzer <ecstatic.coder@gmail.com>",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/senselogic/EUREKA.git"
+    },
+    "bugs": {
+        "url": "https://github.com/senselogic/EUREKA/issues"
+    },
+    "homepage": "https://github.com/senselogic/EUREKA",
+    "type": "module",
+    "main": "src/index.js",
+    "files": [
+        "src/",
+        "README.md"
+    ],
     "keywords": [
         "mysql",
         "orm",
@@ -12,19 +26,6 @@
         "database",
         "sql",
         "nodejs"
-    ],
-    "homepage": "https://github.com/senselogic/EUREKA",
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/senselogic/EUREKA.git"
-    },
-    "bugs": {
-        "url": "https://github.com/senselogic/EUREKA/issues"
-    },
-    "main": "src/index.js",
-    "files": [
-        "src/",
-        "README.md"
     ],
     "dependencies": {
         "senselogic-gist": "^0.1.0",
