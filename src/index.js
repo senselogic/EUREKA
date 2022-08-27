@@ -1168,4 +1168,26 @@ export class DATABASE
                     )
             );
     }
+
+    // ~~
+
+    async CreateTables(
+        )
+    {
+        for ( let table of this.TableArray )
+        {
+            await table.Create();
+        }
+    }
+
+    // ~~
+
+    async DropTables(
+        )
+    {
+        for ( let table of this.TableArray )
+        {
+            await table.Drop();
+        }
+    }
 }
