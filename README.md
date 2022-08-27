@@ -2,7 +2,7 @@
 
 # Eureka
 
-Lightweight ORM for CRUD queries on MySQL databases.
+Lightweight ORM for CRUD queries on MySQL and PostgreSQL databases.
 
 ## Version
 
