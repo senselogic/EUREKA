@@ -692,7 +692,7 @@ export class Table
                         += " "
                            + expression[ expressionTokenIndex ]
                            + " "
-                           + this.getEncodedValue( expression[ expressionTokenIndex + 1 ] )
+                           + this.getEncodedValue( expression[ expressionTokenIndex + 1 ] );
                 }
 
                 encodedExpression += " )";
@@ -760,7 +760,7 @@ export class Table
             where,
             order,
             limit,
-            arguments
+            values
         } = {}
         )
     {
@@ -806,7 +806,7 @@ export class Table
             statement += " limit " + limit;
         }
 
-        let rowArray = await this.database.query( statement, arguments );
+        let rowArray = await this.database.query( statement, values );
 
         return this.getDecodedRowArray( rowArray );
     }
@@ -817,11 +817,11 @@ export class Table
         {
             columns,
             where,
-            arguments
+            values
         } = {}
         )
     {
-        let rowArray = await this.selectRows(  { columns, where, limit : 1, arguments } );
+        let rowArray = await this.selectRows(  { columns, where, limit : 1, values } );
 
         if ( rowArray.length > 0 )
         {
@@ -839,11 +839,11 @@ export class Table
         {
             columns,
             where,
-            arguments
+            values
         } = {}
         )
     {
-        let rowArray = await this.selectRows( { columns, where, limit : 1, arguments } );
+        let rowArray = await this.selectRows( { columns, where, limit : 1, values } );
 
         return rowArray.length > 0;
     }
