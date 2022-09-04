@@ -502,12 +502,12 @@ export class Table
     // ~~
 
     getEncodedColumnNameArray(
-        column_nameArray
+        columnNameArray
         )
     {
         let encodedColumnNameArray = [];
 
-        for ( let columnName of column_nameArray )
+        for ( let columnName of columnNameArray )
         {
             encodedColumnNameArray.push( "`" + columnName + "`" );
         }
@@ -548,9 +548,9 @@ export class Table
     {
         let encodedSortingColumnNameArray = [];
 
-        for ( let dorting_column_name of sortingColumnNameArray )
+        for ( let sortingColumnName of sortingColumnNameArray )
         {
-            encodedSortingColumnNameArray.push( this.getEncodedSortingColumnName( dorting_column_name ) );
+            encodedSortingColumnNameArray.push( this.getEncodedSortingColumnName( sortingColumnName ) );
         }
 
         return encodedSortingColumnNameArray;
@@ -1050,11 +1050,11 @@ export class Database
         {
             name = typeDataArray[ 0 ];
 
-            for ( let type_data_index = 1;
-                  type_data_index < typeDataArray.length;
-                  ++type_data_index )
+            for ( let typeDateIndex = 1;
+                  typeDateIndex < typeDataArray.length;
+                  ++typeDateIndex )
             {
-                let subType = this.GetType( table, column, typeDataArray[ type_data_index ] );
+                let subType = this.GetType( table, column, typeDataArray[ typeDateIndex ] );
                 subTypeArray.push( subType );
             }
         }
