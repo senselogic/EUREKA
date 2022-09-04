@@ -1,6 +1,6 @@
 // -- IMPORTS
 
-import mysql from "mysql2/promise";
+import mysql from 'mysql2/promise';
 import {
     getDateText,
     getDateTimeText,
@@ -11,7 +11,7 @@ import {
     getUniversalTime,
     nullUuid,
     nullTuid
-    } from "senselogic-gist";
+    } from 'senselogic-gist';
 
 // -- TYPES
 
@@ -50,21 +50,21 @@ export class Type
         this.column = column;
         this.name = name;
         this.subTypeArray = subTypeArray;
-        this.isBoolean = ( name === "BOOL" );
-        this.isNatural = name.startsWith( "UINT" );
-        this.isInteger = name.startsWith( "INT" );
-        this.isReal = name.startsWith( "FLOAT" );
-        this.isNumeric = ( name === "NUMERIC" || this.isBoolean || this.isNatural || this.isInteger || this.isReal );
-        this.isTuid = ( name === "TUID" );
-        this.isUuid = ( name === "UUID" );
-        this.isDate = ( name === "DATE" );
-        this.isTime = ( name === "TIME" );
-        this.isDateTime = ( name === "DATETIME" );
-        this.isString = ( name.startsWith( "STRING" ) || this.isTuid || this.Uuid || this.isDate || this.isDateTime );
-        this.isList = ( name === "LIST" );
-        this.isMap = ( name === "MAP" );
-        this.isObject = ( name === "OBJECT" );
-        this.isJson = ( name === "JSON" || name === this.isList || this.isMap || this.isObject );
+        this.isBoolean = ( name === 'BOOL' );
+        this.isNatural = name.startsWith( 'UINT' );
+        this.isInteger = name.startsWith( 'INT' );
+        this.isReal = name.startsWith( 'FLOAT' );
+        this.isNumeric = ( name === 'NUMERIC' || this.isBoolean || this.isNatural || this.isInteger || this.isReal );
+        this.isTuid = ( name === 'TUID' );
+        this.isUuid = ( name === 'UUID' );
+        this.isDate = ( name === 'DATE' );
+        this.isTime = ( name === 'TIME' );
+        this.isDateTime = ( name === 'DATETIME' );
+        this.isString = ( name.startsWith( 'STRING' ) || this.isTuid || this.Uuid || this.isDate || this.isDateTime );
+        this.isList = ( name === 'LIST' );
+        this.isMap = ( name === 'MAP' );
+        this.isObject = ( name === 'OBJECT' );
+        this.isJson = ( name === 'JSON' || name === this.isList || this.isMap || this.isObject );
     }
 
     // -- INQUIRIES
@@ -110,7 +110,7 @@ export class Type
         }
         else
         {
-            return "";
+            return '';
         }
     }
 }
@@ -185,7 +185,7 @@ export class Column
     getEncodedName(
         )
     {
-        return "`" + this.name + "`";
+        return '`' + this.name + '`';
     }
 
     // ~~
@@ -195,39 +195,39 @@ export class Column
     {
         switch ( this.type.name )
         {
-            case "BOOL" : return "TINYINT UNSIGNED";
-            case "INT8" : return "TINYINT";
-            case "UINT8" : return "TINYINT UNSIGNED";
-            case "INT16" : return "SMALLINT";
-            case "UINT16" : return "SMALLINT UNSIGNED";
-            case "INT32" : return "INT";
-            case "UINT32" : return "INT UNSIGNED";
-            case "INT64" : return "BIGINT";
-            case "UINT64" : return "BIGINT UNSIGNED";
-            case "FLOAT32" : return "FLOAT";
-            case "FLOAT64" : return "DOUBLE";
-            case "STRING8" : return "TINYTEXT";
-            case "STRING16" : return "TEXT";
-            case "STRING24" : return "MEDIUMTEXT";
-            case "STRING32" : return "LONGTEXT";
-            case "STRING" :
+            case 'BOOL' : return 'TINYINT UNSIGNED';
+            case 'INT8' : return 'TINYINT';
+            case 'UINT8' : return 'TINYINT UNSIGNED';
+            case 'INT16' : return 'SMALLINT';
+            case 'UINT16' : return 'SMALLINT UNSIGNED';
+            case 'INT32' : return 'INT';
+            case 'UINT32' : return 'INT UNSIGNED';
+            case 'INT64' : return 'BIGINT';
+            case 'UINT64' : return 'BIGINT UNSIGNED';
+            case 'FLOAT32' : return 'FLOAT';
+            case 'FLOAT64' : return 'DOUBLE';
+            case 'STRING8' : return 'TINYTEXT';
+            case 'STRING16' : return 'TEXT';
+            case 'STRING24' : return 'MEDIUMTEXT';
+            case 'STRING32' : return 'LONGTEXT';
+            case 'STRING' :
             {
-                if ( this.hasProperty( "capacity" ) )
+                if ( this.hasProperty( 'capacity' ) )
                 {
-                    return "VARCHAR( " + this.getPropertyValue( "capacity" ) + " )";
+                    return 'VARCHAR( ' + this.getPropertyValue( 'capacity' ) + ' )';
                 }
                 else
                 {
-                    return "TEXT";
+                    return 'TEXT';
                 }
             }
-            case "DATE" : return "DATE";
-            case "TIME" : return "TIME";
-            case "DATETIME" : return "DATETIME";
-            case "TUID" : return "VARCHAR( 22 )";
-            case "UUID" : return "VARCHAR( 36 )";
-            case "BLOB" : return "BLOB";
-            default : return "TEXT";
+            case 'DATE' : return 'DATE';
+            case 'TIME' : return 'TIME';
+            case 'DATETIME' : return 'DATETIME';
+            case 'TUID' : return 'VARCHAR( 22 )';
+            case 'UUID' : return 'VARCHAR( 36 )';
+            case 'BLOB' : return 'BLOB';
+            default : return 'TEXT';
         }
     }
 
@@ -238,24 +238,24 @@ export class Column
     {
         let encodedDeclaration
             = this.getEncodedName()
-              + " "
+              + ' '
               + this.getEncodedType();
 
-        if ( this.hasProperty( "null" ) )
+        if ( this.hasProperty( 'null' ) )
         {
-            if ( this.getPropertyValue( "null" ) )
+            if ( this.getPropertyValue( 'null' ) )
             {
-                encodedDeclaration += " null";
+                encodedDeclaration += ' null';
             }
             else
             {
-                encodedDeclaration += " not null";
+                encodedDeclaration += ' not null';
             }
         }
 
-        if ( this.getPropertyValue( "incremented", false ) )
+        if ( this.getPropertyValue( 'incremented', false ) )
         {
-            encodedDeclaration += " auto_increment";
+            encodedDeclaration += ' auto_increment';
         }
 
         return encodedDeclaration;
@@ -343,7 +343,7 @@ export class Column
         {
             this.propertyByNameMap.set( property.name, property );
 
-            if ( property.name === "key" )
+            if ( property.name === 'key' )
             {
                 this.isKey = true;
             }
@@ -380,7 +380,7 @@ export class Table
 
         if ( column === undefined )
         {
-            throw new Error( "Invalid column name : " + columnName );
+            throw new Error( 'Invalid column name : ' + columnName );
         }
 
         return column;
@@ -415,7 +415,7 @@ export class Table
     getEncodedName(
         )
     {
-        return "`" + this.database.name + "`.`" + this.name + "`";
+        return '`' + this.database.name + '`.`' + this.name + '`';
     }
 
     // ~~
@@ -432,7 +432,7 @@ export class Table
 
             if ( column === undefined )
             {
-                throw new Error( "Invalid column name : " + columnName );
+                throw new Error( 'Invalid column name : ' + columnName );
             }
             else
             {
@@ -457,7 +457,7 @@ export class Table
 
             if ( column === undefined )
             {
-                throw new Error( "Invalid column name : " + columnName );
+                throw new Error( 'Invalid column name : ' + columnName );
             }
             else
             {
@@ -509,7 +509,7 @@ export class Table
 
         for ( let columnName of columnNameArray )
         {
-            encodedColumnNameArray.push( "`" + columnName + "`" );
+            encodedColumnNameArray.push( '`' + columnName + '`' );
         }
 
         return encodedColumnNameArray;
@@ -523,19 +523,19 @@ export class Table
     {
         switch ( sortingColumnName.substring( 0, 1 ) )
         {
-            case "+" :
+            case '+' :
             {
-                return "`" + sortingColumnName.substring( 1 ) + "` asc";
+                return '`' + sortingColumnName.substring( 1 ) + '` asc';
             }
 
-            case "-" :
+            case '-' :
             {
-                return "`" + sortingColumnName.substring( 1 ) + "` desc";
+                return '`' + sortingColumnName.substring( 1 ) + '` desc';
             }
 
             default :
             {
-                return "`" + sortingColumnName + "` asc";
+                return '`' + sortingColumnName + '` asc';
             }
         }
     }
@@ -566,7 +566,7 @@ export class Table
 
         for ( let columnName of Object.keys( encodedRow ) )
         {
-            encodedRowColumnNameArray.push( "`" + columnName + "`" );
+            encodedRowColumnNameArray.push( '`' + columnName + '`' );
         }
 
         return encodedRowColumnNameArray;
@@ -603,14 +603,14 @@ export class Table
 
             if ( column === undefined )
             {
-                throw new Error( "Invalid column name : " + columnName );
+                throw new Error( 'Invalid column name : ' + columnName );
             }
             else
             {
                 if ( column.isKey === columnIsKey )
                 {
                     encodedRowColumnAssignmentArray.push(
-                        "`" + columnName + "` = " + encodedRow[ columnName ]
+                        '`' + columnName + '` = ' + encodedRow[ columnName ]
                         );
                 }
             }
@@ -625,11 +625,11 @@ export class Table
         value
         )
     {
-        if ( typeof value === "number" )
+        if ( typeof value === 'number' )
         {
             return value;
         }
-        else if ( typeof value === "string" )
+        else if ( typeof value === 'string' )
         {
             return getQuotedText( value );
         }
@@ -639,7 +639,7 @@ export class Table
         }
         else
         {
-            throw Error( "Invalid condition value : " + value );
+            throw Error( 'Invalid condition value : ' + value );
         }
     }
 
@@ -649,32 +649,32 @@ export class Table
         expression
         )
     {
-        if ( typeof expression === "string" )
+        if ( typeof expression === 'string' )
         {
             return expression;
         }
         else if ( Array.isArray( expression ) )
         {
             if ( expression.length === 1
-                 && typeof expression[ 0 ] === "string" )
+                 && typeof expression[ 0 ] === 'string' )
             {
-                if ( expression[ 0 ] === "?" )
+                if ( expression[ 0 ] === '?' )
                 {
-                    return "?";
+                    return '?';
                 }
                 else
                 {
-                    return "`" + expression[ 0 ] + "`";
+                    return '`' + expression[ 0 ] + '`';
                 }
             }
             else if ( expression.length === 2 )
             {
-                if ( expression[ 0 ] === "not" )
+                if ( expression[ 0 ] === 'not' )
                 {
                     return (
-                        "( not "
+                        '( not '
                         + this.getEncodedValue( expression[ 2 ] )
-                        + " )"
+                        + ' )'
                         );
                 }
             }
@@ -682,26 +682,26 @@ export class Table
                       && ( expression.length & 1 ) === 1 )
             {
                 let encodedExpression
-                    = "( " + this.getEncodedValue( expression[ 0 ] );
+                    = '( ' + this.getEncodedValue( expression[ 0 ] );
 
                 for ( let expressionTokenIndex = 1;
                       expressionTokenIndex + 1 < expression.length;
                       expressionTokenIndex += 2 )
                 {
                     encodedExpression
-                        += " "
+                        += ' '
                            + expression[ expressionTokenIndex ]
-                           + " "
+                           + ' '
                            + this.getEncodedValue( expression[ expressionTokenIndex + 1 ] );
                 }
 
-                encodedExpression += " )";
+                encodedExpression += ' )';
 
                 return encodedExpression;
             }
         }
 
-        throw new Error( "Invalid condition expression : " + JSON.stringify( expression ) );
+        throw new Error( 'Invalid condition expression : ' + JSON.stringify( expression ) );
     }
 
     // ~~
@@ -710,20 +710,20 @@ export class Table
         )
     {
         let statement
-            = "create table if not exists "
+            = 'create table if not exists '
               + this.getEncodedName()
-              + "( "
-              + this.getEncodedColumnDeclarationArray().join( ", " );
+              + '( '
+              + this.getEncodedColumnDeclarationArray().join( ', ' );
 
         for ( let column of this.columnArray )
         {
             if ( column.isKey )
             {
-                statement += ", primary key(`" + column.name + "`)";
+                statement += ', primary key(`' + column.name + '`)';
             }
         }
 
-        statement += " )";
+        statement += ' )';
 
         await this.database.query( statement );
     }
@@ -734,7 +734,7 @@ export class Table
         )
     {
         let statement
-            = "drop table if exists "
+            = 'drop table if exists '
               + this.getEncodedName();
 
         await this.database.query( statement );
@@ -764,13 +764,13 @@ export class Table
         } = {}
         )
     {
-        let statement = "select ";
+        let statement = 'select ';
 
         if ( columns !== undefined )
         {
             if ( Array.isArray( columns ) )
             {
-                statement += this.getEncodedColumnNameArray( columns ).join( ", " );
+                statement += this.getEncodedColumnNameArray( columns ).join( ', ' );
             }
             else
             {
@@ -779,31 +779,31 @@ export class Table
         }
         else
         {
-            statement += "*";
+            statement += '*';
         }
 
-        statement += " from " + this.getEncodedName();
+        statement += ' from ' + this.getEncodedName();
 
         if ( where !== undefined )
         {
-            statement += " where " + this.getEncodedExpression( where );
+            statement += ' where ' + this.getEncodedExpression( where );
         }
 
         if ( order !== undefined )
         {
             if ( Array.isArray( order ) )
             {
-                statement += " order by " + this.getEncodedOrder( order ).join( ", " );
+                statement += ' order by ' + this.getEncodedOrder( order ).join( ', ' );
             }
             else
             {
-                statement += " order by " + this.getEncodedSortingColumnName( order );
+                statement += ' order by ' + this.getEncodedSortingColumnName( order );
             }
         }
 
         if ( limit !== undefined )
         {
-            statement += " limit " + limit;
+            statement += ' limit ' + limit;
         }
 
         let rowArray = await this.database.query( statement, values );
@@ -857,13 +857,13 @@ export class Table
         let filledRow = this.getFilledRow( row );
         let encodedRow = this.getEncodedRow( filledRow );
         let statement
-            = "insert into "
+            = 'insert into '
               + this.getEncodedName()
-              + "( "
-              + this.getEncodedRowColumnNameArray( encodedRow ).join( ", " )
-              + " ) values ( "
-              + this.getEncodedRowColumnValueArray( encodedRow ).join( ", " )
-              + " )";
+              + '( '
+              + this.getEncodedRowColumnNameArray( encodedRow ).join( ', ' )
+              + ' ) values ( '
+              + this.getEncodedRowColumnValueArray( encodedRow ).join( ', ' )
+              + ' )';
 
         await this.database.query( statement );
 
@@ -879,13 +879,13 @@ export class Table
         let filledRow = this.getFilledRow( row );
         let encodedRow = this.getEncodedRow( filledRow );
         let statement
-            = "replace into "
+            = 'replace into '
               + this.getEncodedName()
-              + "( "
-              + this.getEncodedRowColumnNameArray( encodedRow ).join( ", " )
-              + " ) values ( "
-              + this.getEncodedRowColumnValueArray( encodedRow ).join( ", " )
-              + " )";
+              + '( '
+              + this.getEncodedRowColumnNameArray( encodedRow ).join( ', ' )
+              + ' ) values ( '
+              + this.getEncodedRowColumnValueArray( encodedRow ).join( ', ' )
+              + ' )';
 
         await this.database.query( statement );
 
@@ -900,12 +900,12 @@ export class Table
     {
         let encodedRow = this.getEncodedRow( row );
         let statement
-            = "update "
+            = 'update '
               + this.getEncodedName()
-              + " set "
-              + this.getEncodedRowColumnAssignmentArray( encodedRow, false ).join( ", " )
-              + " where"
-              + this.getEncodedRowColumnAssignmentArray( encodedRow, true ).join( ", " );
+              + ' set '
+              + this.getEncodedRowColumnAssignmentArray( encodedRow, false ).join( ', ' )
+              + ' where'
+              + this.getEncodedRowColumnAssignmentArray( encodedRow, true ).join( ', ' );
 
         await this.database.query( statement );
     }
@@ -918,10 +918,10 @@ export class Table
     {
         let encodedRow = this.getEncodedRow( row );
         let statement
-            = "delete from "
+            = 'delete from '
               + this.getEncodedName()
-              + " where"
-              + this.getEncodedRowColumnAssignmentArray( encodedRow, true ).join( ", " );
+              + ' where'
+              + this.getEncodedRowColumnAssignmentArray( encodedRow, true ).join( ', ' );
 
         await this.database.query( statement );
     }
@@ -968,7 +968,7 @@ export class Database
         this.name = name;
         this.tableArray = [];
         this.tableByNameMap = new Map();
-        this.driverName = "";
+        this.driverName = '';
         this.connection = null;
     }
 
@@ -982,7 +982,7 @@ export class Database
 
         if ( table === undefined )
         {
-            throw new Error( "Invalid table name : " + tableName );
+            throw new Error( 'Invalid table name : ' + tableName );
         }
 
         return table;
@@ -1001,9 +1001,9 @@ export class Database
 
         for ( let propertyData of propertyDataArray )
         {
-            if ( typeof propertyData === "string" )
+            if ( typeof propertyData === 'string' )
             {
-                if ( propertyData.startsWith( "!" ) )
+                if ( propertyData.startsWith( '!' ) )
                 {
                     property = new Property( this, propertyData.substring( 1 ), false );
                 }
@@ -1019,7 +1019,7 @@ export class Database
             }
             else
             {
-                throw new Error( "Invalid property data : " + JSON.stringify( propertyData ) );
+                throw new Error( 'Invalid property data : ' + JSON.stringify( propertyData ) );
             }
 
             propertyArray.push( property );
@@ -1041,7 +1041,7 @@ export class Database
 
         let subTypeArray = [];
 
-        if ( typeof typeDataArray === "string" )
+        if ( typeof typeDataArray === 'string' )
         {
             name = typeDataArray;
         }
@@ -1060,7 +1060,7 @@ export class Database
         }
         else
         {
-            throw new Error( "Invalid type data for column " + column.name + " of table " + table.name + " : " + JSON.stringify( typeDataArray ) );
+            throw new Error( 'Invalid type data for column ' + column.name + ' of table ' + table.name + ' : ' + JSON.stringify( typeDataArray ) );
         }
 
         let type = new Type( this, table, column, name, subTypeArray );
@@ -1099,7 +1099,7 @@ export class Database
             }
             else
             {
-                throw new Error( "Invalid column data for table " + table.name + " : " + JSON.stringify( columnDataArray ) );
+                throw new Error( 'Invalid column data for table ' + table.name + ' : ' + JSON.stringify( columnDataArray ) );
             }
         }
 
@@ -1130,7 +1130,7 @@ export class Database
         host,
         user,
         password,
-        driverName = "mysql"
+        driverName = 'mysql2'
         )
     {
         this.driverName = driverName;
