@@ -2,20 +2,20 @@
 
 import mysql from "mysql2/promise";
 import {
-    GetDateText,
-    GetDateTimeText,
-    GetQuotedText,
-    GetTimeText,
-    GetUniversalDate,
-    GetUniversalDateTime,
-    GetUniversalTime,
-    NullUuid,
-    NullTuid
+    getDateText,
+    getDateTimeText,
+    getQuotedText,
+    getTimeText,
+    getUniversalDate,
+    getUniversalDateTime,
+    getUniversalTime,
+    nullUuid,
+    nullTuid
     } from "senselogic-gist";
 
 // -- TYPES
 
-export class PROPERTY
+export class Property
 {
     // -- CONSTRUCTORS
 
@@ -25,15 +25,15 @@ export class PROPERTY
         value
         )
     {
-        this.Database = database;
-        this.Name = name;
+        this.database = database;
+        this.name = name;
         this.Value = value;
     }
 }
 
 // ~~
 
-export class TYPE
+export class Type
 {
     // -- CONSTRUCTORS
 
@@ -42,69 +42,69 @@ export class TYPE
         table,
         column,
         name,
-        sub_type_array = []
+        subTypeArray = []
         )
     {
-        this.Database = database;
-        this.Table = table;
-        this.Column = column;
-        this.Name = name;
-        this.SubTypeArray = sub_type_array;
-        this.IsBoolean = ( name === "BOOL" );
-        this.IsNatural = name.startsWith( "UINT" );
-        this.IsInteger = name.startsWith( "INT" );
-        this.IsReal = name.startsWith( "FLOAT" );
-        this.IsNumeric = ( name === "NUMERIC" || this.IsBoolean || this.IsNatural || this.IsInteger || this.IsReal );
-        this.IsTuid = ( name === "TUID" );
-        this.IsUuid = ( name === "UUID" );
-        this.IsDate = ( name === "DATE" );
-        this.IsTime = ( name === "TIME" );
-        this.IsDateTime = ( name === "DATETIME" );
-        this.IsString = ( name.startsWith( "STRING" ) || this.IsTuid || this.Uuid || this.IsDate || this.IsDateTime );
-        this.IsList = ( name === "LIST" );
-        this.IsMap = ( name === "MAP" );
-        this.IsObject = ( name === "OBJECT" );
-        this.IsJson = ( name === "JSON" || name === this.IsList || this.IsMap || this.IsObject );
+        this.database = database;
+        this.table = table;
+        this.column = column;
+        this.name = name;
+        this.subTypeArray = subTypeArray;
+        this.isBoolean = ( name === "BOOL" );
+        this.isNatural = name.startsWith( "UINT" );
+        this.isInteger = name.startsWith( "INT" );
+        this.isReal = name.startsWith( "FLOAT" );
+        this.isNumeric = ( name === "NUMERIC" || this.isBoolean || this.isNatural || this.isInteger || this.isReal );
+        this.isTuid = ( name === "TUID" );
+        this.isUuid = ( name === "UUID" );
+        this.isDate = ( name === "DATE" );
+        this.isTime = ( name === "TIME" );
+        this.isDateTime = ( name === "DATETIME" );
+        this.isString = ( name.startsWith( "STRING" ) || this.isTuid || this.Uuid || this.isDate || this.isDateTime );
+        this.isList = ( name === "LIST" );
+        this.isMap = ( name === "MAP" );
+        this.isObject = ( name === "OBJECT" );
+        this.isJson = ( name === "JSON" || name === this.isList || this.isMap || this.isObject );
     }
 
     // -- INQUIRIES
 
-    GetDefaultValue(
+    getDefaultValue(
         )
     {
-        if ( this.IsReal )
+        if ( this.isReal )
         {
             return 0.0;
         }
-        else if ( this.IsNumeric )
+        else if ( this.isNumeric )
         {
             return 0;
         }
-        else if ( this.IsTuid )
+        else if ( this.isTuid )
         {
-            return NullTuid;
+            return nullTuid;
         }
-        else if ( this.IsUuid )
+        else if ( this.isUuid )
         {
-            return NullUuid;
+            return nullUuid;
         }
-        else if ( this.IsDate )
+        else if ( this.isDate )
         {
-            return GetDateText( GetUniversalDate() );
+            return getDateText( getUniversalDate() );
         }
-        else if ( this.IsTime )
+        else if ( this.isTime )
         {
-            return GetTimeText( GetUniversalTime() );
+            return getTimeText( getUniversalTime() );
         }
-        else if ( this.IsDateTime )
+        else if ( this.isDateTime )
         {
-            return GetDateTimeText( GetUniversalDateTime() );
+            return getDateTimeText( getUniversalDateTime() );
         }
-        else if ( this.IsList )
+        else if ( this.isList )
         {
             return [];
         }
-        else if ( this.IsJson )
+        else if ( this.isJson )
         {
             return {};
         }
@@ -117,7 +117,7 @@ export class TYPE
 
 // ~~
 
-export class COLUMN
+export class Column
 {
     // -- CONSTRUCTORS
 
@@ -127,73 +127,73 @@ export class COLUMN
         name
         )
     {
-        this.Database = database;
-        this.Table = table;
-        this.Name = name;
-        this.Type = null;
-        this.DefaultValue = undefined;
-        this.PropertyArray = [];
-        this.PropertyByNameMap = new Map();
-        this.IsKey = false;
+        this.database = database;
+        this.table = table;
+        this.name = name;
+        this.type = null;
+        this.defaultValue = undefined;
+        this.propertyArray = [];
+        this.propertyByNameMap = new Map();
+        this.isKey = false;
     }
 
     // -- INQUIRIES
 
-    GetDefaultValue(
+    getDefaultValue(
         )
     {
-        if ( this.DefaultValue !== undefined )
+        if ( this.defaultValue !== undefined )
         {
-            return this.DefaultValue;
+            return this.defaultValue;
         }
         else
         {
-            return this.Type.GetDefaultValue();
+            return this.type.getDefaultValue();
         }
     }
 
     // ~~
 
-    HasProperty(
-        property_name
+    hasProperty(
+        propertyName
         )
     {
-        return this.PropertyByNameMap.has( property_name );
+        return this.propertyByNameMap.has( propertyName );
     }
 
     // ~~
 
-    GetPropertyValue(
-        property_name,
-        default_property_value
+    getPropertyValue(
+        propertyName,
+        defaultPropertyValue
         )
     {
-        let property_value = this.PropertyByNameMap.get( property_name );
+        let propertyValue = this.propertyByNameMap.get( propertyName );
 
-        if ( property_value !== undefined )
+        if ( propertyValue !== undefined )
         {
-            return property_value;
+            return propertyValue;
         }
         else
         {
-            return default_property_value;
+            return defaultPropertyValue;
         }
     }
 
     // ~~
 
-    GetEncodedName(
+    getEncodedName(
         )
     {
-        return "`" + this.Name + "`";
+        return "`" + this.name + "`";
     }
 
     // ~~
 
-    GetEncodedType(
+    getEncodedType(
         )
     {
-        switch ( this.Type.Name )
+        switch ( this.type.name )
         {
             case "BOOL" : return "TINYINT UNSIGNED";
             case "INT8" : return "TINYINT";
@@ -212,9 +212,9 @@ export class COLUMN
             case "STRING32" : return "LONGTEXT";
             case "STRING" :
             {
-                if ( this.HasProperty( "capacity" ) )
+                if ( this.hasProperty( "capacity" ) )
                 {
-                    return "VARCHAR( " + this.GetPropertyValue( "capacity" ) + " )";
+                    return "VARCHAR( " + this.getPropertyValue( "capacity" ) + " )";
                 }
                 else
                 {
@@ -233,77 +233,77 @@ export class COLUMN
 
     // ~~
 
-    GetEncodedDeclaration(
+    getEncodedDeclaration(
         )
     {
-        let encoded_declaration
-            = this.GetEncodedName()
+        let encodedDeclaration
+            = this.getEncodedName()
               + " "
-              + this.GetEncodedType();
+              + this.getEncodedType();
 
-        if ( this.HasProperty( "null" ) )
+        if ( this.hasProperty( "null" ) )
         {
-            if ( this.GetPropertyValue( "null" ) )
+            if ( this.getPropertyValue( "null" ) )
             {
-                encoded_declaration += " null";
+                encodedDeclaration += " null";
             }
             else
             {
-                encoded_declaration += " not null";
+                encodedDeclaration += " not null";
             }
         }
 
-        if ( this.GetPropertyValue( "incremented", false ) )
+        if ( this.getPropertyValue( "incremented", false ) )
         {
-            encoded_declaration += " auto_increment";
+            encodedDeclaration += " auto_increment";
         }
 
-        return encoded_declaration;
+        return encodedDeclaration;
     }
 
     // ~~
 
-    GetEncodedValue(
+    getEncodedValue(
         value
         )
     {
-        if ( this.Type.IsNumeric )
+        if ( this.type.isNumeric )
         {
             return value;
         }
-        else if ( this.Type.IsJson )
+        else if ( this.type.isJson )
         {
-             return GetQuotedText( JSON.stringify( value ) );
+             return getQuotedText( JSON.stringify( value ) );
         }
         else
         {
-            return GetQuotedText( value );
+            return getQuotedText( value );
         }
     }
 
     // ~~
 
-    GetDecodedValue(
+    getDecodedValue(
         value
         )
     {
-        if ( this.Type.IsNumeric )
+        if ( this.type.isNumeric )
         {
-            return Number( value );
+            return number( value );
         }
-        else if ( this.Type.IsDate )
+        else if ( this.type.isDate )
         {
-            return GetDateText( GetUniversalDate( value ) );
+            return getDateText( getUniversalDate( value ) );
         }
-        else if ( this.Type.IsTime )
+        else if ( this.type.isTime )
         {
-            return GetTimeText( GetUniversalTime( value ) );
+            return getTimeText( getUniversalTime( value ) );
         }
-        else if ( this.Type.IsDateTime )
+        else if ( this.type.isDateTime )
         {
-            return GetDateTimeText( GetUniversalDateTime( value ) );
+            return getDateTimeText( getUniversalDateTime( value ) );
         }
-        else if ( this.Type.IsJson )
+        else if ( this.type.isJson )
         {
             return JSON.parse( value );
         }
@@ -315,37 +315,37 @@ export class COLUMN
 
     // -- OPERATIONS
 
-    SetType(
+    setType(
         type
         )
     {
-        this.Type = type;
+        this.type = type;
     }
 
     // ~~
 
-    SetDefaultValue(
-        default_value
+    setDefaultValue(
+        defaultValue
         )
     {
-        this.DefaultValue = default_value;
+        this.defaultValue = defaultValue;
     }
 
     // ~~
 
-    SetPropertyArray(
-        property_array
+    setPropertyArray(
+        propertyArray
         )
     {
-        this.PropertyArray = property_array;
+        this.propertyArray = propertyArray;
 
-        for ( let property of this.PropertyArray )
+        for ( let property of this.propertyArray )
         {
-            this.PropertyByNameMap.set( property.Name, property );
+            this.propertyByNameMap.set( property.name, property );
 
-            if ( property.Name === "key" )
+            if ( property.name === "key" )
             {
-                this.IsKey = true;
+                this.isKey = true;
             }
         }
     }
@@ -353,7 +353,7 @@ export class COLUMN
 
 // ~~
 
-export class TABLE
+export class Table
 {
     // -- CONSTRUCTORS
 
@@ -362,25 +362,25 @@ export class TABLE
         name
         )
     {
-        this.Database = database;
-        this.Name = name;
-        this.ColumnArray = [];
-        this.ColumnByNameMap = new Map();
-        this.PropertyArray = [];
-        this.PropertyByNameMap = new Map();
+        this.database = database;
+        this.name = name;
+        this.columnArray = [];
+        this.columnByNameMap = new Map();
+        this.propertyArray = [];
+        this.propertyByNameMap = new Map();
     }
 
     // -- INQUIRIES
 
-    GetColumnByName(
-        column_name
+    getColumnByName(
+        columnName
         )
     {
-        let column = this.ColumnByNameMap.get( column_name );
+        let column = this.columnByNameMap.get( columnName );
 
         if ( column === undefined )
         {
-            throw new Error( "Invalid column name : " + column_name );
+            throw new Error( "Invalid column name : " + columnName );
         }
 
         return column;
@@ -388,240 +388,240 @@ export class TABLE
 
     // ~~
 
-    GetFilledRow(
+    getFilledRow(
         row
         )
     {
-        let filled_row = {};
+        let filledRow = {};
 
-        for ( let column of this.ColumnArray )
+        for ( let column of this.columnArray )
         {
-            if ( row.hasOwnProperty( column.Name )
-                 && row[ column.Name ] !== undefined )
+            if ( row.hasOwnProperty( column.name )
+                 && row[ column.name ] !== undefined )
             {
-                filled_row[ column.Name ] = row[ column.Name ];
+                filledRow[ column.name ] = row[ column.name ];
             }
             else
             {
-                filled_row[ column.Name ] = column.GetDefaultValue();
+                filledRow[ column.name ] = column.getDefaultValue();
             }
         }
 
-        return filled_row;
+        return filledRow;
     }
 
     // ~~
 
-    GetEncodedName(
+    getEncodedName(
         )
     {
-        return "`" + this.Database.Name + "`.`" + this.Name + "`";
+        return "`" + this.database.name + "`.`" + this.name + "`";
     }
 
     // ~~
 
-    GetEncodedRow(
+    getEncodedRow(
         row
         )
     {
-        let encoded_row = {};
+        let encodedRow = {};
 
-        for ( let column_name of Object.keys( row ) )
+        for ( let columnName of Object.keys( row ) )
         {
-            let column = this.ColumnByNameMap.get( column_name );
+            let column = this.columnByNameMap.get( columnName );
 
             if ( column === undefined )
             {
-                throw new Error( "Invalid column name : " + column_name );
+                throw new Error( "Invalid column name : " + columnName );
             }
             else
             {
-                encoded_row[ column_name ] = column.GetEncodedValue( row[ column_name ] );
+                encodedRow[ columnName ] = column.getEncodedValue( row[ columnName ] );
             }
         }
 
-        return encoded_row;
+        return encodedRow;
     }
 
     // ~~
 
-    GetDecodedRow(
+    getDecodedRow(
         row
         )
     {
-        let decoded_row = {};
+        let decodedRow = {};
 
-        for ( let column_name of Object.keys( row ) )
+        for ( let columnName of Object.keys( row ) )
         {
-            let column = this.ColumnByNameMap.get( column_name );
+            let column = this.columnByNameMap.get( columnName );
 
             if ( column === undefined )
             {
-                throw new Error( "Invalid column name : " + column_name );
+                throw new Error( "Invalid column name : " + columnName );
             }
             else
             {
-                decoded_row[ column_name ] = column.GetDecodedValue( row[ column_name ] );
+                decodedRow[ columnName ] = column.getDecodedValue( row[ columnName ] );
             }
         }
 
-        return decoded_row;
+        return decodedRow;
     }
 
     // ~~
 
-    GetDecodedRowArray(
-        row_array
+    getDecodedRowArray(
+        rowArray
         )
     {
-        let decoded_row_array = [];
+        let decodedRowArray = [];
 
-        for ( let row of row_array )
+        for ( let row of rowArray )
         {
-            decoded_row_array.push( this.GetDecodedRow( row ) );
+            decodedRowArray.push( this.getDecodedRow( row ) );
         }
 
-        return decoded_row_array;
+        return decodedRowArray;
     }
 
     // ~~
 
-    GetEncodedColumnDeclarationArray(
+    getEncodedColumnDeclarationArray(
         )
     {
-        let encoded_column_declaration_array = [];
+        let encodedColumnDeclarationArray = [];
 
-        for ( let column of this.ColumnArray )
+        for ( let column of this.columnArray )
         {
-            encoded_column_declaration_array.push( column.GetEncodedDeclaration() );
+            encodedColumnDeclarationArray.push( column.getEncodedDeclaration() );
         }
 
-        return encoded_column_declaration_array;
+        return encodedColumnDeclarationArray;
     }
 
     // ~~
 
-    GetEncodedColumnNameArray(
-        column_name_array
+    getEncodedColumnNameArray(
+        column_nameArray
         )
     {
-        let encoded_column_name_array = [];
+        let encodedColumnNameArray = [];
 
-        for ( let column_name of column_name_array )
+        for ( let columnName of column_nameArray )
         {
-            encoded_column_name_array.push( "`" + column_name + "`" );
+            encodedColumnNameArray.push( "`" + columnName + "`" );
         }
 
-        return encoded_column_name_array;
+        return encodedColumnNameArray;
     }
 
     // ~~
 
-    GetEncodedSortingColumnName(
-        sorting_column_name
+    getEncodedSortingColumnName(
+        sortingColumnName
         )
     {
-        switch ( sorting_column_name.substring( 0, 1 ) )
+        switch ( sortingColumnName.substring( 0, 1 ) )
         {
             case "+" :
             {
-                return "`" + sorting_column_name.substring( 1 ) + "` asc";
+                return "`" + sortingColumnName.substring( 1 ) + "` asc";
             }
 
             case "-" :
             {
-                return "`" + sorting_column_name.substring( 1 ) + "` desc";
+                return "`" + sortingColumnName.substring( 1 ) + "` desc";
             }
 
             default :
             {
-                return "`" + sorting_column_name + "` asc";
+                return "`" + sortingColumnName + "` asc";
             }
         }
     }
 
     // ~~
 
-    GetEncodedSortingColumnNameArray(
-        sorting_column_name_array
+    getEncodedSortingColumnNameArray(
+        sortingColumnNameArray
         )
     {
-        let encoded_sorting_column_name_array = [];
+        let encodedSortingColumnNameArray = [];
 
-        for ( let dorting_column_name of sorting_column_name_array )
+        for ( let dorting_column_name of sortingColumnNameArray )
         {
-            encoded_sorting_column_name_array.push( this.GetEncodedSortingColumnName( dorting_column_name ) );
+            encodedSortingColumnNameArray.push( this.getEncodedSortingColumnName( dorting_column_name ) );
         }
 
-        return encoded_sorting_column_name_array;
+        return encodedSortingColumnNameArray;
     }
 
     // ~~
 
-    GetEncodedRowColumnNameArray(
-        encoded_row
+    getEncodedRowColumnNameArray(
+        encodedRow
         )
     {
-        let encoded_row_column_name_array = [];
+        let encodedRowColumnNameArray = [];
 
-        for ( let column_name of Object.keys( encoded_row ) )
+        for ( let columnName of Object.keys( encodedRow ) )
         {
-            encoded_row_column_name_array.push( "`" + column_name + "`" );
+            encodedRowColumnNameArray.push( "`" + columnName + "`" );
         }
 
-        return encoded_row_column_name_array;
+        return encodedRowColumnNameArray;
     }
 
     // ~~
 
-    GetEncodedRowColumnValueArray(
-        encoded_row
+    getEncodedRowColumnValueArray(
+        encodedRow
         )
     {
-        let column_row_column_value_array = [];
+        let encodedRowColumnValueArray = [];
 
-        for ( let column_name of Object.keys( encoded_row ) )
+        for ( let columnName of Object.keys( encodedRow ) )
         {
-            column_row_column_value_array.push( encoded_row[ column_name ] );
+            encodedRowColumnValueArray.push( encodedRow[ columnName ] );
         }
 
-        return column_row_column_value_array;
+        return encodedRowColumnValueArray;
     }
 
     // ~~
 
-    GetEncodedRowColumnAssignmentArray(
-        encoded_row,
-        column_is_key
+    getEncodedRowColumnAssignmentArray(
+        encodedRow,
+        columnIsKey
         )
     {
-        let encoded_row_column_assignment_array = [];
+        let encodedRowColumnAssignmentArray = [];
 
-        for ( let column_name of Object.keys( encoded_row ) )
+        for ( let columnName of Object.keys( encodedRow ) )
         {
-            let column = this.ColumnByNameMap.get( column_name );
+            let column = this.columnByNameMap.get( columnName );
 
             if ( column === undefined )
             {
-                throw new Error( "Invalid column name : " + column_name );
+                throw new Error( "Invalid column name : " + columnName );
             }
             else
             {
-                if ( column.IsKey === column_is_key )
+                if ( column.isKey === columnIsKey )
                 {
-                    encoded_row_column_assignment_array.push(
-                        "`" + column_name + "` = " + encoded_row[ column_name ]
+                    encodedRowColumnAssignmentArray.push(
+                        "`" + columnName + "` = " + encodedRow[ columnName ]
                         );
                 }
             }
         }
 
-        return encoded_row_column_assignment_array;
+        return encodedRowColumnAssignmentArray;
     }
 
     // ~~
 
-    GetEncodedValue(
+    getEncodedValue(
         value
         )
     {
@@ -631,11 +631,11 @@ export class TABLE
         }
         else if ( typeof value === "string" )
         {
-            return GetQuotedText( value );
+            return getQuotedText( value );
         }
         else if ( Array.isArray( value ) )
         {
-            return this.GetEncodedExpression( value );
+            return this.getEncodedExpression( value );
         }
         else
         {
@@ -645,7 +645,7 @@ export class TABLE
 
     // ~~
 
-    GetEncodedExpression(
+    getEncodedExpression(
         expression
         )
     {
@@ -673,7 +673,7 @@ export class TABLE
                 {
                     return (
                         "( not "
-                        + this.GetEncodedValue( expression[ 2 ] )
+                        + this.getEncodedValue( expression[ 2 ] )
                         + " )"
                         );
                 }
@@ -681,23 +681,23 @@ export class TABLE
             else if ( expression.length >= 3
                       && ( expression.length & 1 ) === 1 )
             {
-                let encoded_expression
-                    = "( " + this.GetEncodedValue( expression[ 0 ] );
+                let encodedExpression
+                    = "( " + this.getEncodedValue( expression[ 0 ] );
 
-                for ( let expression_token_index = 1;
-                      expression_token_index + 1 < expression.length;
-                      expression_token_index += 2 )
+                for ( let expressionTokenIndex = 1;
+                      expressionTokenIndex + 1 < expression.length;
+                      expressionTokenIndex += 2 )
                 {
-                    encoded_expression
+                    encodedExpression
                         += " "
-                           + expression[ expression_token_index ]
+                           + expression[ expressionTokenIndex ]
                            + " "
-                           + this.GetEncodedValue( expression[ expression_token_index + 1 ] )
+                           + this.getEncodedValue( expression[ expressionTokenIndex + 1 ] )
                 }
 
-                encoded_expression += " )";
+                encodedExpression += " )";
 
-                return encoded_expression;
+                return encodedExpression;
             }
         }
 
@@ -706,75 +706,75 @@ export class TABLE
 
     // ~~
 
-    async Create(
+    async create(
         )
     {
         let statement
             = "create table if not exists "
-              + this.GetEncodedName()
+              + this.getEncodedName()
               + "( "
-              + this.GetEncodedColumnDeclarationArray().join( ", " );
+              + this.getEncodedColumnDeclarationArray().join( ", " );
 
-        for ( let column of this.ColumnArray )
+        for ( let column of this.columnArray )
         {
-            if ( column.IsKey )
+            if ( column.isKey )
             {
-                statement += ", primary key(`" + column.Name + "`)";
+                statement += ", primary key(`" + column.name + "`)";
             }
         }
 
         statement += " )";
 
-        await this.Database.Query( statement );
+        await this.database.query( statement );
     }
 
     // ~~
 
-    async Drop(
+    async drop(
         )
     {
         let statement
             = "drop table if exists "
-              + this.GetEncodedName();
+              + this.getEncodedName();
 
-        await this.Database.Query( statement );
+        await this.database.query( statement );
     }
 
     // ~~
 
-    async QueryRows(
+    async queryRows(
         statement,
-        argument_array = undefined
+        argumentArray = undefined
         )
     {
-        let row_array = await this.Database.Query( statement, argument_array );
+        let rowArray = await this.database.query( statement, argumentArray );
 
-        return this.GetDecodedRowArray( row_array );
+        return this.getDecodedRowArray( rowArray );
     }
 
     // ~~
 
-    async SelectRows(
+    async selectRows(
         {
-            Columns,
-            Where,
-            Order,
-            Limit,
-            Arguments
+            columns,
+            where,
+            order,
+            limit,
+            arguments
         } = {}
         )
     {
         let statement = "select ";
 
-        if ( Columns !== undefined )
+        if ( columns !== undefined )
         {
-            if ( Array.isArray( Columns ) )
+            if ( Array.isArray( columns ) )
             {
-                statement += this.GetEncodedColumnNameArray( Columns ).join( ", " );
+                statement += this.getEncodedColumnNameArray( columns ).join( ", " );
             }
             else
             {
-                statement += Columns;
+                statement += columns;
             }
         }
         else
@@ -782,50 +782,50 @@ export class TABLE
             statement += "*";
         }
 
-        statement += " from " + this.GetEncodedName();
+        statement += " from " + this.getEncodedName();
 
-        if ( Where !== undefined )
+        if ( where !== undefined )
         {
-            statement += " where " + this.GetEncodedExpression( Where );
+            statement += " where " + this.getEncodedExpression( where );
         }
 
-        if ( Order !== undefined )
+        if ( order !== undefined )
         {
-            if ( Array.isArray( Order ) )
+            if ( Array.isArray( order ) )
             {
-                statement += " order by " + this.GetEncodedOrder( Order ).join( ", " );
+                statement += " order by " + this.getEncodedOrder( order ).join( ", " );
             }
             else
             {
-                statement += " order by " + this.GetEncodedSortingColumnName( Order );
+                statement += " order by " + this.getEncodedSortingColumnName( order );
             }
         }
 
-        if ( Limit !== undefined )
+        if ( limit !== undefined )
         {
-            statement += " limit " + Limit;
+            statement += " limit " + limit;
         }
 
-        let row_array = await this.Database.Query( statement, Arguments );
+        let rowArray = await this.database.query( statement, arguments );
 
-        return this.GetDecodedRowArray( row_array );
+        return this.getDecodedRowArray( rowArray );
     }
 
     // ~~
 
-    async SelectRow(
+    async selectRow(
         {
-            Columns,
-            Where,
-            Arguments
+            columns,
+            where,
+            arguments
         } = {}
         )
     {
-        let row_array = await this.SelectRows(  { Columns, Where, Limit : 1, Arguments } );
+        let rowArray = await this.selectRows(  { columns, where, limit : 1, arguments } );
 
-        if ( row_array.length > 0 )
+        if ( rowArray.length > 0 )
         {
-            return row_array[ 0 ];
+            return rowArray[ 0 ];
         }
         else
         {
@@ -835,129 +835,129 @@ export class TABLE
 
     // ~~
 
-    async HasRow(
+    async hasRow(
         {
-            Columns,
-            Where,
-            Arguments
+            columns,
+            where,
+            arguments
         } = {}
         )
     {
-        let row_array = await this.SelectRows( { Columns, Where, Limit : 1, Arguments } );
+        let rowArray = await this.selectRows( { columns, where, limit : 1, arguments } );
 
-        return row_array.length > 0;
+        return rowArray.length > 0;
     }
 
     // ~~
 
-    async InsertRow(
+    async insertRow(
         row
         )
     {
-        let filled_row = this.GetFilledRow( row );
-        let encoded_row = this.GetEncodedRow( filled_row );
+        let filledRow = this.getFilledRow( row );
+        let encodedRow = this.getEncodedRow( filledRow );
         let statement
             = "insert into "
-              + this.GetEncodedName()
+              + this.getEncodedName()
               + "( "
-              + this.GetEncodedRowColumnNameArray( encoded_row ).join( ", " )
+              + this.getEncodedRowColumnNameArray( encodedRow ).join( ", " )
               + " ) values ( "
-              + this.GetEncodedRowColumnValueArray( encoded_row ).join( ", " )
+              + this.getEncodedRowColumnValueArray( encodedRow ).join( ", " )
               + " )";
 
-        await this.Database.Query( statement );
+        await this.database.query( statement );
 
-        return filled_row;
+        return filledRow;
     }
 
     // ~~
 
-    async ReplaceRow(
+    async replaceRow(
         row
         )
     {
-        let filled_row = this.GetFilledRow( row );
-        let encoded_row = this.GetEncodedRow( filled_row );
+        let filledRow = this.getFilledRow( row );
+        let encodedRow = this.getEncodedRow( filledRow );
         let statement
             = "replace into "
-              + this.GetEncodedName()
+              + this.getEncodedName()
               + "( "
-              + this.GetEncodedRowColumnNameArray( encoded_row ).join( ", " )
+              + this.getEncodedRowColumnNameArray( encodedRow ).join( ", " )
               + " ) values ( "
-              + this.GetEncodedRowColumnValueArray( encoded_row ).join( ", " )
+              + this.getEncodedRowColumnValueArray( encodedRow ).join( ", " )
               + " )";
 
-        await this.Database.Query( statement );
+        await this.database.query( statement );
 
-        return filled_row;
+        return filledRow;
     }
 
     // ~~
 
-    async UpdateRow(
+    async updateRow(
         row
         )
     {
-        let encoded_row = this.GetEncodedRow( row );
+        let encodedRow = this.getEncodedRow( row );
         let statement
             = "update "
-              + this.GetEncodedName()
+              + this.getEncodedName()
               + " set "
-              + this.GetEncodedRowColumnAssignmentArray( encoded_row, false ).join( ", " )
+              + this.getEncodedRowColumnAssignmentArray( encodedRow, false ).join( ", " )
               + " where"
-              + this.GetEncodedRowColumnAssignmentArray( encoded_row, true ).join( ", " );
+              + this.getEncodedRowColumnAssignmentArray( encodedRow, true ).join( ", " );
 
-        await this.Database.Query( statement );
+        await this.database.query( statement );
     }
 
     // ~~
 
-    async DeleteRow(
+    async deleteRow(
         row
         )
     {
-        let encoded_row = this.GetEncodedRow( row );
+        let encodedRow = this.getEncodedRow( row );
         let statement
             = "delete from "
-              + this.GetEncodedName()
+              + this.getEncodedName()
               + " where"
-              + this.GetEncodedRowColumnAssignmentArray( encoded_row, true ).join( ", " );
+              + this.getEncodedRowColumnAssignmentArray( encodedRow, true ).join( ", " );
 
-        await this.Database.Query( statement );
+        await this.database.query( statement );
     }
 
     // -- OPERATIONS
 
-    SetColumnArray(
-        column_array
+    setColumnArray(
+        columnArray
         )
     {
-        this.ColumnArray = column_array;
+        this.columnArray = columnArray;
 
-        for ( let column of column_array )
+        for ( let column of columnArray )
         {
-            this.ColumnByNameMap.set( column.Name, column );
+            this.columnByNameMap.set( column.name, column );
         }
     }
 
     // ~~
 
-    SetPropertyArray(
-        property_array
+    setPropertyArray(
+        propertyArray
         )
     {
-        this.PropertyArray = property_array;
+        this.propertyArray = propertyArray;
 
-        for ( let property of this.PropertyArray )
+        for ( let property of this.propertyArray )
         {
-            this.PropertyByNameMap.set( property.Name, property );
+            this.propertyByNameMap.set( property.name, property );
         }
     }
 }
 
 // ~~
 
-export class DATABASE
+export class Database
 {
     // -- CONSTRUCTORS
 
@@ -965,24 +965,24 @@ export class DATABASE
         name
         )
     {
-        this.Name = name;
-        this.TableArray = [];
-        this.TableByNameMap = new Map();
-        this.Driver = "";
-        this.Connection = null;
+        this.name = name;
+        this.tableArray = [];
+        this.tableByNameMap = new Map();
+        this.driverName = "";
+        this.connection = null;
     }
 
     // -- INQUIRIES
 
-    GetTableByName(
-        table_name
+    getTableByName(
+        tableName
         )
     {
-        let table = this.TableByNameMap.get( table_name );
+        let table = this.tableByNameMap.get( tableName );
 
         if ( table === undefined )
         {
-            throw new Error( "Invalid table name : " + table_name );
+            throw new Error( "Invalid table name : " + tableName );
         }
 
         return table;
@@ -990,42 +990,42 @@ export class DATABASE
 
     // ~~
 
-    GetPropertyArray(
-        property_data_array
+    getPropertyArray(
+        propertyDataArray
         )
     {
         var
             property;
 
-        let property_array = [];
+        let propertyArray = [];
 
-        for ( let property_data of property_data_array )
+        for ( let propertyData of propertyDataArray )
         {
-            if ( typeof property_data === "string" )
+            if ( typeof propertyData === "string" )
             {
-                if ( property_data.startsWith( "!" ) )
+                if ( propertyData.startsWith( "!" ) )
                 {
-                    property = new PROPERTY( this, property_data.substring( 1 ), false );
+                    property = new Property( this, propertyData.substring( 1 ), false );
                 }
                 else
                 {
-                    property = new PROPERTY( this, property_data, true );
+                    property = new Property( this, propertyData, true );
                 }
             }
-            else if ( Array.isArray( property_data )
-                      && property_data.length === 2 )
+            else if ( Array.isArray( propertyData )
+                      && propertyData.length === 2 )
             {
-                property = new PROPERTY( this, property_data[ 0 ], property_data[ 1 ] );
+                property = new Property( this, propertyData[ 0 ], propertyData[ 1 ] );
             }
             else
             {
-                throw new Error( "Invalid property data : " + JSON.stringify( property_data ) );
+                throw new Error( "Invalid property data : " + JSON.stringify( propertyData ) );
             }
 
-            property_array.push( property );
+            propertyArray.push( property );
         }
 
-        return property_array;
+        return propertyArray;
     }
 
     // ~~
@@ -1033,133 +1033,133 @@ export class DATABASE
     GetType(
         table,
         column,
-        type_data_array
+        typeDataArray
         )
     {
         var
             name;
 
-        let sub_type_array = [];
+        let subTypeArray = [];
 
-        if ( typeof type_data_array === "string" )
+        if ( typeof typeDataArray === "string" )
         {
-            name = type_data_array;
+            name = typeDataArray;
         }
-        else if ( Array.isArray( type_data_array )
-                  && type_data_array.length > 0 )
+        else if ( Array.isArray( typeDataArray )
+                  && typeDataArray.length > 0 )
         {
-            name = type_data_array[ 0 ];
+            name = typeDataArray[ 0 ];
 
             for ( let type_data_index = 1;
-                  type_data_index < type_data_array.length;
+                  type_data_index < typeDataArray.length;
                   ++type_data_index )
             {
-                let sub_type = this.GetType( table, column, type_data_array[ type_data_index ] );
-                sub_type_array.push( sub_type );
+                let subType = this.GetType( table, column, typeDataArray[ type_data_index ] );
+                subTypeArray.push( subType );
             }
         }
         else
         {
-            throw new Error( "Invalid type data for column " + column.Name + " of table " + table.Name + " : " + JSON.stringify( type_data_array ) );
+            throw new Error( "Invalid type data for column " + column.name + " of table " + table.name + " : " + JSON.stringify( typeDataArray ) );
         }
 
-        let type = new TYPE( this, table, column, name, sub_type_array );
+        let type = new Type( this, table, column, name, subTypeArray );
 
         return type;
     }
 
     // ~~
 
-    GetColumnArray(
+    getColumnArray(
         table,
-        column_data_array_array
+        columnDataArrayArray
         )
     {
-        let column_array = [];
+        let columnArray = [];
 
-        for ( let column_data_array of column_data_array_array )
+        for ( let columnDataArray of columnDataArrayArray )
         {
-            if ( Array.isArray( column_data_array )
-                 && column_data_array.length >= 2 )
+            if ( Array.isArray( columnDataArray )
+                 && columnDataArray.length >= 2 )
             {
-                let column = new COLUMN( this, table, column_data_array[ 0 ] );
-                column.SetType( this.GetType( table, column, column_data_array[ 1 ] ) );
+                let column = new Column( this, table, columnDataArray[ 0 ] );
+                column.setType( this.GetType( table, column, columnDataArray[ 1 ] ) );
 
-                if ( column_data_array.length >= 3 )
+                if ( columnDataArray.length >= 3 )
                 {
-                    column.SetPropertyArray( this.GetPropertyArray( column_data_array[ 2 ] ) );
+                    column.setPropertyArray( this.getPropertyArray( columnDataArray[ 2 ] ) );
                 }
 
-                if ( column_data_array.length == 4 )
+                if ( columnDataArray.length == 4 )
                 {
-                    column.SetDefaultValue( column_data_array[ 3 ] );
+                    column.setDefaultValue( columnDataArray[ 3 ] );
                 }
 
-                column_array.push( column );
+                columnArray.push( column );
             }
             else
             {
-                throw new Error( "Invalid column data for table " + table.Name + " : " + JSON.stringify( column_data_array ) );
+                throw new Error( "Invalid column data for table " + table.name + " : " + JSON.stringify( columnDataArray ) );
             }
         }
 
-        return column_array;
+        return columnArray;
     }
 
     // -- OPERATIONS
 
-    AddTable(
+    addTable(
         name,
-        column_data_array_array = [],
-        property_data_array = []
+        columnDataArrayArray = [],
+        propertyDataArray = []
         )
     {
-        let table = new TABLE( this, name );
-        table.SetColumnArray( this.GetColumnArray( table, column_data_array_array ) );
-        table.SetPropertyArray( this.GetPropertyArray( property_data_array ) );
+        let table = new Table( this, name );
+        table.setColumnArray( this.getColumnArray( table, columnDataArrayArray ) );
+        table.setPropertyArray( this.getPropertyArray( propertyDataArray ) );
 
-        this.TableArray.push( table );
-        this.TableByNameMap.set( name, table );
+        this.tableArray.push( table );
+        this.tableByNameMap.set( name, table );
 
         return table;
     }
 
     // ~~
 
-    async Connect(
+    async connect(
         host,
         user,
         password,
-        driver = "mysql"
+        driverName = "mysql"
         )
     {
-        this.Driver = driver;
+        this.driverName = driverName;
 
-        if ( this.Connection === null )
+        if ( this.connection === null )
         {
-            this.Connection
+            this.connection
                 = await mysql.createConnection(
                       {
                           host : host,
                           user : user,
                           password : password,
-                          database : this.Name
+                          database : this.name
                       }
                       );
         }
 
-        return this.Connection;
+        return this.connection;
     }
 
     // ~~
 
-    async Query(
+    async query(
         statement,
-        argument_array = undefined
+        argumentArray = undefined
         )
     {
         return (
-            await this.Connection.query( statement, argument_array )
+            await this.connection.query( statement, argumentArray )
                 .then(
                     function( [ rows, fields ] )
                     {
@@ -1171,23 +1171,23 @@ export class DATABASE
 
     // ~~
 
-    async CreateTables(
+    async createTables(
         )
     {
-        for ( let table of this.TableArray )
+        for ( let table of this.tableArray )
         {
-            await table.Create();
+            await table.create();
         }
     }
 
     // ~~
 
-    async DropTables(
+    async dropTables(
         )
     {
-        for ( let table of this.TableArray )
+        for ( let table of this.tableArray )
         {
-            await table.Drop();
+            await table.drop();
         }
     }
 }
