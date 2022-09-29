@@ -289,7 +289,7 @@ export class Column
     {
         if ( this.type.isNumeric )
         {
-            return number( value );
+            return Number( value );
         }
         else if ( this.type.isDate )
         {
