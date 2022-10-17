@@ -1127,10 +1127,13 @@ export class Database
     // ~~
 
     async connect(
-        host,
-        user,
-        password,
-        driverName = 'mysql2'
+        {
+            driverName = 'mysql2',
+            host = 'localhost',
+            port = 3306,
+            user = 'root',
+            password = ''
+        } = {}
         )
     {
         this.driverName = driverName;
@@ -1140,9 +1143,10 @@ export class Database
             this.connection
                 = await mysql.createConnection(
                       {
-                          host : host,
-                          user : user,
-                          password : password,
+                          host,
+                          port,
+                          user,
+                          password,
                           database : this.name
                       }
                       );
