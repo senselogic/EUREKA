@@ -957,6 +957,51 @@ export class Table
 
 // ~~
 
+export class Mysql2Driver
+{
+    // -- CONSTRUCTORS
+
+    constructor(
+        configuration
+        )
+    {
+        this.connectionPool = null;
+        this.connection = null;
+    }
+
+    // -- OPERATIONS
+
+    async createConnection(
+        configuration
+        )
+    {
+        if ( this.connection === null )
+        {
+            this.connection = await mysql.createConnection( configuration );
+        }
+    }
+
+    // ~~
+
+    async query(
+        statement,
+        argumentArray = undefined
+        )
+    {
+        return (
+            await this.connection.query( statement, argumentArray )
+                .then(
+                    function( [ rows, fields ] )
+                    {
+                        return rows;
+                    }
+                    )
+            );
+    }
+}
+
+// ~~
+
 export class Database
 {
     // -- CONSTRUCTORS
@@ -968,8 +1013,7 @@ export class Database
         this.name = name;
         this.tableArray = [];
         this.tableByNameMap = new Map();
-        this.driverName = '';
-        this.connection = null;
+        this.driver = null;
     }
 
     // -- INQUIRIES
@@ -1126,9 +1170,9 @@ export class Database
 
     // ~~
 
-    async connect(
+    async createConnection(
         {
-            driverName = 'mysql2',
+            driver = 'mysql2',
             host = 'localhost',
             port = 3306,
             user = 'root',
@@ -1136,23 +1180,25 @@ export class Database
         } = {}
         )
     {
-        this.driverName = driverName;
-
-        if ( this.connection === null )
+        if ( this.driver === null )
         {
-            this.connection
-                = await mysql.createConnection(
-                      {
-                          host,
-                          port,
-                          user,
-                          password,
-                          database : this.name
-                      }
-                      );
+            this.driver = new Mysql2Driver();
         }
 
-        return this.connection;
+        if ( this.driver.connection === null )
+        {
+            await this.driver.createConnection(
+                {
+                  host,
+                  port,
+                  user,
+                  password,
+                  database : this.name
+                }
+                );
+        }
+
+        return this.driver.connection;
     }
 
     // ~~
@@ -1162,15 +1208,7 @@ export class Database
         argumentArray = undefined
         )
     {
-        return (
-            await this.connection.query( statement, argumentArray )
-                .then(
-                    function( [ rows, fields ] )
-                    {
-                        return rows;
-                    }
-                    )
-            );
+        return this.driver.query( statement, argumentArray );
     }
 
     // ~~
