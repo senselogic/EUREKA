@@ -1249,9 +1249,9 @@ export class Database
             port = 3306,
             user = 'root',
             password = '',
-            waitForConnections: true,
-            connectionLimit: 10,
-            queueLimit: 0
+            waitForConnections = true,
+            connectionLimit = 10,
+            queueLimit = 0
         } = {}
         )
     {
