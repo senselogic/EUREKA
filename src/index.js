@@ -965,8 +965,8 @@ export class Mysql2Driver
         configuration
         )
     {
-        this.connectionPool = null;
         this.connection = null;
+        this.connectionPool = null;
     }
 
     // -- OPERATIONS
@@ -975,10 +975,26 @@ export class Mysql2Driver
         configuration
         )
     {
-        if ( this.connection === null )
+        if ( this.connection !== null )
         {
-            this.connection = await mysql.createConnection( configuration );
+            this.connection.end();
         }
+
+        this.connection = await mysql.createConnection( configuration );
+    }
+
+    // ~~
+
+    async createConnectionPool(
+        configuration
+        )
+    {
+        if ( this.connectionPool !== null )
+        {
+            this.connectionPool.end();
+        }
+
+        this.connectionPool = await mysql.createPool( configuration );
     }
 
     // ~~
@@ -988,15 +1004,34 @@ export class Mysql2Driver
         argumentArray = undefined
         )
     {
-        return (
-            await this.connection.query( statement, argumentArray )
-                .then(
-                    function( [ rows, fields ] )
-                    {
-                        return rows;
-                    }
-                    )
-            );
+        if ( this.connection !== null )
+        {
+            return (
+                await this.connection.execute( statement, argumentArray )
+                    .then(
+                        function( [ rows, fields ] )
+                        {
+                            return rows;
+                        }
+                        )
+                );
+        }
+        else if ( this.connectionPool !== null )
+        {
+            return (
+                await this.connectionPool.execute( statement, argumentArray )
+                    .then(
+                        function( [ rows, fields ] )
+                        {
+                            return rows;
+                        }
+                        )
+                );
+        }
+        else
+        {
+            throw new Error( 'No connection' );
+        }
     }
 }
 
@@ -1182,23 +1217,63 @@ export class Database
     {
         if ( this.driver === null )
         {
+            if ( driver === 'mysql2' )
+            {
+                this.driver = new Mysql2Driver();
+            }
+            else
+            {
+                throw new Error( 'Invalid driver name : ' + driver );
+            }
+        }
+
+        await this.driver.createConnection(
+            {
+              host,
+              port,
+              user,
+              password,
+              database : this.name
+            }
+            );
+
+        return this.driver.connection;
+    }
+
+    // ~~
+
+    async createConnectionPool(
+        {
+            driver = 'mysql2',
+            host = 'localhost',
+            port = 3306,
+            user = 'root',
+            password = '',
+            waitForConnections: true,
+            connectionLimit: 10,
+            queueLimit: 0
+        } = {}
+        )
+    {
+        if ( this.driver === null )
+        {
             this.driver = new Mysql2Driver();
         }
 
-        if ( this.driver.connection === null )
-        {
-            await this.driver.createConnection(
-                {
-                  host,
-                  port,
-                  user,
-                  password,
-                  database : this.name
-                }
-                );
-        }
+        await this.driver.createConnectionPool(
+            {
+              host,
+              port,
+              user,
+              password,
+              database : this.name,
+              waitForConnections,
+              connectionLimit,
+              queueLimit
+            }
+            );
 
-        return this.driver.connection;
+        return this.driver.connectionPool;
     }
 
     // ~~
