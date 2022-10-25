@@ -962,9 +962,9 @@ export class Mysql2Driver
     // -- CONSTRUCTORS
 
     constructor(
-        configuration
         )
     {
+        this.configuration = null;
         this.connection = null;
         this.connectionPool = null;
     }
@@ -980,7 +980,12 @@ export class Mysql2Driver
             this.connection.end();
         }
 
-        this.connection = await mysql.createConnection( configuration );
+        if ( configuration !== undefined )
+        {
+            this.configuration = configuration;
+        }
+
+        this.connection = await mysql.createConnection( this.configuration );
     }
 
     // ~~
@@ -994,7 +999,12 @@ export class Mysql2Driver
             this.connectionPool.end();
         }
 
-        this.connectionPool = await mysql.createPool( configuration );
+        if ( configuration !== undefined )
+        {
+            this.configuration = configuration;
+        }
+
+        this.connectionPool = await mysql.createPool( this.configuration );
     }
 
     // ~~
@@ -1006,10 +1016,15 @@ export class Mysql2Driver
     {
         if ( this.connection !== null )
         {
+            if ( this.connection._closing )
+            {
+                await this.createConnection();
+            }
+
             return (
                 await this.connection.execute( statement, argumentArray )
                     .then(
-                        function( [ rows, fields ] )
+                        function ( [ rows, fields ] )
                         {
                             return rows;
                         }
@@ -1021,7 +1036,7 @@ export class Mysql2Driver
             return (
                 await this.connectionPool.execute( statement, argumentArray )
                     .then(
-                        function( [ rows, fields ] )
+                        function ( [ rows, fields ] )
                         {
                             return rows;
                         }
@@ -1257,7 +1272,14 @@ export class Database
     {
         if ( this.driver === null )
         {
-            this.driver = new Mysql2Driver();
+            if ( driver === 'mysql2' )
+            {
+                this.driver = new Mysql2Driver();
+            }
+            else
+            {
+                throw new Error( 'Invalid driver name : ' + driver );
+            }
         }
 
         await this.driver.createConnectionPool(
