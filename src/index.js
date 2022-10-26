@@ -1,6 +1,5 @@
 // -- IMPORTS
 
-import mysql from 'mysql2/promise';
 import {
     getDateText,
     getDateTimeText,
@@ -957,101 +956,6 @@ export class Table
 
 // ~~
 
-export class Mysql2Driver
-{
-    // -- CONSTRUCTORS
-
-    constructor(
-        )
-    {
-        this.configuration = null;
-        this.connection = null;
-        this.connectionPool = null;
-    }
-
-    // -- OPERATIONS
-
-    async createConnection(
-        configuration
-        )
-    {
-        if ( this.connection !== null )
-        {
-            this.connection.end();
-        }
-
-        if ( configuration !== undefined )
-        {
-            this.configuration = configuration;
-        }
-
-        this.connection = await mysql.createConnection( this.configuration );
-    }
-
-    // ~~
-
-    async createConnectionPool(
-        configuration
-        )
-    {
-        if ( this.connectionPool !== null )
-        {
-            this.connectionPool.end();
-        }
-
-        if ( configuration !== undefined )
-        {
-            this.configuration = configuration;
-        }
-
-        this.connectionPool = await mysql.createPool( this.configuration );
-    }
-
-    // ~~
-
-    async query(
-        statement,
-        argumentArray = undefined
-        )
-    {
-        if ( this.connection !== null )
-        {
-            if ( this.connection._closing )
-            {
-                await this.createConnection();
-            }
-
-            return (
-                await this.connection.execute( statement, argumentArray )
-                    .then(
-                        function ( [ rows, fields ] )
-                        {
-                            return rows;
-                        }
-                        )
-                );
-        }
-        else if ( this.connectionPool !== null )
-        {
-            return (
-                await this.connectionPool.execute( statement, argumentArray )
-                    .then(
-                        function ( [ rows, fields ] )
-                        {
-                            return rows;
-                        }
-                        )
-                );
-        }
-        else
-        {
-            throw new Error( 'No connection' );
-        }
-    }
-}
-
-// ~~
-
 export class Database
 {
     // -- CONSTRUCTORS
@@ -1220,82 +1124,39 @@ export class Database
 
     // ~~
 
-    async createConnection(
-        {
-            driver = 'mysql2',
-            host = 'localhost',
-            port = 3306,
-            user = 'root',
-            password = ''
-        } = {}
+    setDriver(
+        driver
         )
     {
-        if ( this.driver === null )
-        {
-            if ( driver === 'mysql2' )
-            {
-                this.driver = new Mysql2Driver();
-            }
-            else
-            {
-                throw new Error( 'Invalid driver name : ' + driver );
-            }
-        }
+        this.driver = driver;
+    }
 
+    // ~~
+
+    async createConnection(
+        configuration
+        )
+    {
         await this.driver.createConnection(
             {
-              host,
-              port,
-              user,
-              password,
-              database : this.name
+                database : this.name,
+                ...configuration
             }
             );
-
-        return this.driver.connection;
     }
 
     // ~~
 
     async createConnectionPool(
-        {
-            driver = 'mysql2',
-            host = 'localhost',
-            port = 3306,
-            user = 'root',
-            password = '',
-            waitForConnections = true,
-            connectionLimit = 10,
-            queueLimit = 0
-        } = {}
+        configuration
         )
     {
-        if ( this.driver === null )
-        {
-            if ( driver === 'mysql2' )
-            {
-                this.driver = new Mysql2Driver();
-            }
-            else
-            {
-                throw new Error( 'Invalid driver name : ' + driver );
-            }
-        }
-
         await this.driver.createConnectionPool(
             {
-              host,
-              port,
-              user,
-              password,
-              database : this.name,
-              waitForConnections,
-              connectionLimit,
-              queueLimit
+                database : this.name,
+                ...configuration
             }
             );
-
-        return this.driver.connectionPool;
     }
 
     // ~~

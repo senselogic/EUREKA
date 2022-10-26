@@ -1,7 +1,7 @@
 {
-    "name": "senselogic-eureka",
-    "description": "Minimalistic ORM for MySQL and PostgreSQL databases.",
-    "version": "0.1.31",
+    "name": "senselogic-eureka-mysql",
+    "description": "Eureka Mysql driver.",
+    "version": "0.1.1",
     "author": "Eric Pelzer <ecstatic.coder@gmail.com>",
     "license": "LGPL-3.0-only",
     "repository": {
@@ -19,15 +19,11 @@
         "README.md"
     ],
     "keywords": [
+        "eureka",
         "mysql",
-        "orm",
-        "object relational mapper",
-        "db",
-        "database",
-        "sql",
-        "nodejs"
+        "driver"
     ],
     "dependencies": {
-        "senselogic-gist": "^0.1.0"
+        "mysql": "^2.18.1"
     }
 }
