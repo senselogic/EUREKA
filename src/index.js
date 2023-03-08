@@ -63,7 +63,7 @@ export class Type
         this.isList = ( name === 'LIST' );
         this.isMap = ( name === 'MAP' );
         this.isObject = ( name === 'OBJECT' );
-        this.isJson = ( name === 'JSON' || name === this.isList || this.isMap || this.isObject );
+        this.isJson = ( name === 'JSON' || this.isList || this.isMap || this.isObject );
     }
 
     // -- INQUIRIES
