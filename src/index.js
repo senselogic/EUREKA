@@ -134,6 +134,8 @@ export class Column
         this.propertyArray = [];
         this.propertyByNameMap = new Map();
         this.isKey = false;
+        this.isNullable = false;
+        this.isIncremented = false;
     }
 
     // -- INQUIRIES
@@ -240,9 +242,9 @@ export class Column
               + ' '
               + this.getEncodedType();
 
-        if ( this.hasProperty( 'null' ) )
+        if ( this.hasProperty( 'nullable' ) )
         {
-            if ( this.getPropertyValue( 'null' ) )
+            if ( this.getPropertyValue( 'nullable' ) )
             {
                 encodedDeclaration += ' null';
             }
@@ -345,6 +347,14 @@ export class Column
             if ( property.name === 'key' )
             {
                 this.isKey = true;
+            }
+            else if ( property.name === 'nullable' )
+            {
+                this.isNullable = true;
+            }
+            else if ( property.name === 'incremented' )
+            {
+                this.isIncremented = true;
             }
         }
     }
