@@ -59,7 +59,8 @@ export class Type
         this.isDate = ( name === 'DATE' );
         this.isTime = ( name === 'TIME' );
         this.isDateTime = ( name === 'DATETIME' );
-        this.isString = ( name.startsWith( 'STRING' ) || this.isTuid || this.Uuid || this.isDate || this.isDateTime );
+        this.isTimestamp = ( name === 'DATETIME' );
+        this.isString = ( name.startsWith( 'STRING' ) || this.isTuid || this.Uuid || this.isDate || this.isDateTime || this.isTimestamp );
         this.isList = ( name === 'LIST' );
         this.isMap = ( name === 'MAP' );
         this.isObject = ( name === 'OBJECT' );
@@ -98,6 +99,10 @@ export class Type
         else if ( this.isDateTime )
         {
             return getDateTimeText( getUniversalDateTime() );
+        }
+        else if ( this.isTimestamp )
+        {
+            return getTimestampText( getUniversalDateTime() );
         }
         else if ( this.isList )
         {
@@ -225,6 +230,7 @@ export class Column
             case 'DATE' : return 'DATE';
             case 'TIME' : return 'TIME';
             case 'DATETIME' : return 'DATETIME';
+            case 'TIMESTAMP' : return 'TIMESTAMP';
             case 'TUID' : return 'VARCHAR( 22 )';
             case 'UUID' : return 'VARCHAR( 36 )';
             case 'BLOB' : return 'BLOB';
@@ -802,7 +808,7 @@ export class Table
         {
             if ( Array.isArray( order ) )
             {
-                statement += ' order by ' + this.getEncodedOrder( order ).join( ', ' );
+                statement += ' order by ' + this.getEncodedSortingColumnNameArray( order ).join( ', ' );
             }
             else
             {
