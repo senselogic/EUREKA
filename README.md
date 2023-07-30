@@ -87,7 +87,7 @@ await propertyTable.updateRow(
     );
 
 property.id = 'BgsTcQuBCqeEZFwYLFpTKQ';
-property.id = 2;
+property.number = 2;
 await propertyTable.insertRow( property );
 ```
 
